@@ -430,11 +430,16 @@ function renderAnalysisTable(rows){
   t.innerHTML=`<thead><tr><th>Fecha</th><th>Estado</th><th>Total día</th>${cols.map(c=>`<th>${esc(c.label)}</th>`).join('')}${mileageHeads}${calcHeads.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${body}</tbody><tfoot><tr class="total-row">${totalCells.join('')}</tr></tfoot>`;
 }
 
-function incomeTargetForDate(date){
+function incomeReferenceForDate(date){
   if(state.config.profile!=='driver'||!date) return 0;
   const record=state.records.find(r=>r.date===date);
   if(!record) return 0;
-  return Math.max(0,calculateRecord(record).bossLiquidation||0);
+  return num(calculateRecord(record).driverNet);
+}
+function incomeReferenceForRange(from='',to=''){
+  if(state.config.profile!=='driver') return 0;
+  return state.records.filter(r=>r.date&&(!from||r.date>=from)&&(!to||r.date<=to))
+    .reduce((sum,r)=>sum+num(calculateRecord(r).driverNet),0);
 }
 function incomeDenomTotal(denoms={}){
   return INCOME_DENOMINATIONS.reduce((sum,d)=>sum+Math.max(0,Math.trunc(num(denoms[d.key])))*d.value,0);
@@ -458,13 +463,13 @@ function incomeFormDenoms(){
 function renderIncomeDaySummary(){
   const denoms=incomeFormDenoms();
   INCOME_DENOMINATIONS.forEach(d=>{const el=$(`[data-income-subtotal="${d.key}"]`);if(el)el.textContent=money((denoms[d.key]||0)*d.value)});
-  const total=incomeDenomTotal(denoms),target=incomeTargetForDate($('#incomeDate')?.value||'');
-  const owed=Math.max(0,target-total);
+  const total=incomeDenomTotal(denoms),target=incomeReferenceForDate($('#incomeDate')?.value||'');
+  const owed=target-total;
   $('#incomeTarget').textContent=money(target);
   $('#incomeCountedTotal').textContent=money(total);
   $('#incomePaidTotal').textContent=money(total);
   $('#incomeOwed').textContent=money(owed);
-  $('#incomeOwed').classList.toggle('negative',owed>0.005);
+  $('#incomeOwed').classList.toggle('negative',owed< -0.005);
 }
 function clearIncomeForm(keepDate=true){
   $$('[data-income-denom]').forEach(i=>i.value=0);
@@ -487,23 +492,24 @@ function incomeRangeRecords(){
 }
 function incomeRecordFigures(i){
   const total=i.denoms&&Object.keys(i.denoms).length?incomeDenomTotal(i.denoms):num(i.legacyAmount||i.total);
-  const target=incomeTargetForDate(i.date);
-  return {total,target,owed:Math.max(0,target-total)};
+  const target=incomeReferenceForDate(i.date);
+  return {total,target,owed:target-total};
 }
 function renderIncomePeriodSummary(rows){
   const totals=Object.fromEntries(INCOME_DENOMINATIONS.map(d=>[d.key,0]));
   rows.forEach(i=>INCOME_DENOMINATIONS.forEach(d=>totals[d.key]+=Math.max(0,Math.trunc(num(i.denoms?.[d.key])))));
   const grand=rows.reduce((s,i)=>s+incomeRecordFigures(i).total,0);
-  const target=rows.reduce((s,i)=>s+incomeRecordFigures(i).target,0);
-  const owed=Math.max(0,target-grand);
+  const from=$('#incomeRangeFrom')?.value||'',to=$('#incomeRangeTo')?.value||'';
+  const target=incomeReferenceForRange(from,to);
+  const owed=target-grand;
   const denomRows=INCOME_DENOMINATIONS.filter(d=>totals[d.key]>0).map(d=>`<tr><td>${d.label}</td><td>${totals[d.key]}</td><td>${money(totals[d.key]*d.value)}</td></tr>`).join('');
-  $('#incomePeriodSummary').innerHTML=`<div class="income-kpis"><div><small>Días con ingreso</small><strong>${rows.length}</strong></div><div><small>Total ingresado</small><strong>${money(grand)}</strong></div><div><small>Referencia liquidaciones</small><strong>${money(target)}</strong></div><div><small>A deber</small><strong class="${owed>0.005?'negative':''}">${money(owed)}</strong></div></div><div class="table-wrap income-denom-summary"><table><thead><tr><th>Denominación</th><th>Unidades</th><th>Importe</th></tr></thead><tbody>${denomRows||'<tr><td colspan="3" class="empty-state">Sin denominaciones en el periodo.</td></tr>'}</tbody><tfoot><tr class="total-row"><td>TOTAL</td><td>—</td><td>${money(grand)}</td></tr></tfoot></table></div>`;
+  $('#incomePeriodSummary').innerHTML=`<div class="income-kpis"><div><small>Días con ingreso</small><strong>${rows.length}</strong></div><div><small>Total ingresado</small><strong>${money(grand)}</strong></div><div><small>Referencia A percibir chofer</small><strong>${money(target)}</strong></div><div><small>Pendiente por percibir</small><strong class="${owed< -0.005?'negative':''}">${money(owed)}</strong></div></div><div class="table-wrap income-denom-summary"><table><thead><tr><th>Denominación</th><th>Unidades</th><th>Importe</th></tr></thead><tbody>${denomRows||'<tr><td colspan="3" class="empty-state">Sin denominaciones en el periodo.</td></tr>'}</tbody><tfoot><tr class="total-row"><td>TOTAL</td><td>—</td><td>${money(grand)}</td></tr></tfoot></table></div>`;
 }
 function renderIncomes(){
   const rows=incomeRangeRecords();const t=$('#incomeTable');
   renderIncomePeriodSummary(rows);
   if(!rows.length){t.innerHTML='<tbody><tr><td class="empty-state">No hay ingresos guardados en este periodo.</td></tr></tbody>';return}
-  t.innerHTML=`<thead><tr><th>Fecha</th><th>Detalle</th><th>Ingresado</th><th>Ref. jefe</th><th>A deber</th><th>Observación</th><th></th></tr></thead><tbody>${rows.slice().reverse().map(i=>{const f=incomeRecordFigures(i);const detail=INCOME_DENOMINATIONS.filter(d=>num(i.denoms?.[d.key])>0).map(d=>`${Math.trunc(num(i.denoms[d.key]))}×${d.label}`).join(' · ')||(i.legacyAmount?'Importe legado':'—');return `<tr><td>${i.date}</td><td>${detail}</td><td>${money(f.total)}</td><td>${money(f.target)}</td><td class="${f.owed>0.005?'negative':''}">${money(f.owed)}</td><td>${esc(i.note||'')}</td><td class="row-actions"><button class="mini-btn" data-load-income="${i.date}">Cargar</button><button class="mini-btn" data-del-income="${i.id}">Eliminar</button></td></tr>`}).join('')}</tbody>`;
+  t.innerHTML=`<thead><tr><th>Fecha</th><th>Detalle</th><th>Ingresado</th><th>A percibir chofer</th><th>Pendiente</th><th>Observación</th><th></th></tr></thead><tbody>${rows.slice().reverse().map(i=>{const f=incomeRecordFigures(i);const detail=INCOME_DENOMINATIONS.filter(d=>num(i.denoms?.[d.key])>0).map(d=>`${Math.trunc(num(i.denoms[d.key]))}×${d.label}`).join(' · ')||(i.legacyAmount?'Importe legado':'—');return `<tr><td>${i.date}</td><td>${detail}</td><td>${money(f.total)}</td><td>${money(f.target)}</td><td class="${f.owed< -0.005?'negative':''}">${money(f.owed)}</td><td>${esc(i.note||'')}</td><td class="row-actions"><button class="mini-btn" data-load-income="${i.date}">Cargar</button><button class="mini-btn" data-del-income="${i.id}">Eliminar</button></td></tr>`}).join('')}</tbody>`;
   $$('[data-load-income]').forEach(b=>b.onclick=()=>{$('#incomeDate').value=b.dataset.loadIncome;loadIncomeForDate(b.dataset.loadIncome);window.scrollTo({top:$('#incomeForm').offsetTop-120,behavior:'smooth'})});
   $$('[data-del-income]').forEach(b=>b.onclick=async()=>{if(!confirm('¿Eliminar este ingreso guardado?'))return;state.incomes=state.incomes.filter(i=>i.id!==b.dataset.delIncome);await persist();renderIncomes();await autoSyncExcel()});
 }
@@ -530,7 +536,7 @@ function buildWorkbook(){
   const dayRows=excelRows();
   const ws=XLSX.utils.json_to_sheet(dayRows.length?dayRows:[{Info:'Sin jornadas todavía'}]);
   ws['!freeze']={xSplit:0,ySplit:1};XLSX.utils.book_append_sheet(wb,ws,'Jornadas');
-  const incomeRows=state.incomes.map(normalizeIncomeRecord).sort((a,b)=>a.date.localeCompare(b.date)).map(i=>{const f=incomeRecordFigures(i);const row={Fecha:i.date};INCOME_DENOMINATIONS.forEach(d=>{const q=Math.max(0,Math.trunc(num(i.denoms?.[d.key])));row[`Unid. ${d.label}`]=q;row[`Importe ${d.label}`]=q*d.value});row['Total ingresado']=f.total;row['Referencia liquidación jefe']=f.target;row['A deber']=f.owed;row['Observación']=i.note||'';return row});
+  const incomeRows=state.incomes.map(normalizeIncomeRecord).sort((a,b)=>a.date.localeCompare(b.date)).map(i=>{const f=incomeRecordFigures(i);const row={Fecha:i.date};INCOME_DENOMINATIONS.forEach(d=>{const q=Math.max(0,Math.trunc(num(i.denoms?.[d.key])));row[`Unid. ${d.label}`]=q;row[`Importe ${d.label}`]=q*d.value});row['Total ingresado']=f.total;row['Referencia A percibir chofer']=f.target;row['Pendiente por percibir']=f.owed;row['Observación']=i.note||'';return row});
   const inc=XLSX.utils.json_to_sheet(incomeRows.length?incomeRows:[{Info:'Sin ingresos guardados'}]);
   inc['!freeze']={xSplit:0,ySplit:1};XLSX.utils.book_append_sheet(wb,inc,'Ingresos');
   const cfg=[
@@ -685,7 +691,7 @@ function setupEvents(){
     if(existing>=0){r.id=state.records[existing].id;r.createdAt=state.records[existing].createdAt;state.records.splice(existing,1,r)}else state.records.push(r);
     await persist();renderRecent();refreshAnalysis();await autoSyncExcel();toast('Jornada guardada');clearDayForm();
   });
-  $('#incomeForm').addEventListener('submit',async e=>{e.preventDefault();const date=$('#incomeDate').value;if(!date)return;const denoms=incomeFormDenoms();const total=incomeDenomTotal(denoms);const target=incomeTargetForDate(date);const record={id:uid(),date,denoms,total,targetAtSave:target,owedAtSave:Math.max(0,target-total),note:$('#incomeNote').value.trim(),createdAt:new Date().toISOString()};const existing=state.incomes.findIndex(i=>i.date===date);if(existing>=0&&!confirm('Ya hay un ingreso guardado para esa fecha. ¿Sustituirlo?'))return;if(existing>=0){record.id=state.incomes[existing].id;record.createdAt=state.incomes[existing].createdAt||record.createdAt;state.incomes.splice(existing,1,record)}else state.incomes.push(record);await persist();renderIncomes();await autoSyncExcel();toast('Ingreso guardado')});
+  $('#incomeForm').addEventListener('submit',async e=>{e.preventDefault();const date=$('#incomeDate').value;if(!date)return;const denoms=incomeFormDenoms();const total=incomeDenomTotal(denoms);const target=incomeReferenceForDate(date);const record={id:uid(),date,denoms,total,targetAtSave:target,owedAtSave:target-total,note:$('#incomeNote').value.trim(),createdAt:new Date().toISOString()};const existing=state.incomes.findIndex(i=>i.date===date);if(existing>=0&&!confirm('Ya hay un ingreso guardado para esa fecha. ¿Sustituirlo?'))return;if(existing>=0){record.id=state.incomes[existing].id;record.createdAt=state.incomes[existing].createdAt||record.createdAt;state.incomes.splice(existing,1,record)}else state.incomes.push(record);await persist();renderIncomes();await autoSyncExcel();toast('Ingreso guardado')});
   $('#incomeDate').addEventListener('change',e=>loadIncomeForDate(e.target.value));
   $('#clearIncomeBtn').onclick=()=>clearIncomeForm(true);
   $('#applyIncomeRange').onclick=renderIncomes;
