@@ -93,7 +93,17 @@
   </section>
 
   <section class="card">
-    <h2>13. Seguridad de los datos</h2>
+    <h2>13. Pasar los datos entre el teléfono y el PC mediante JSON</h2>
+    <p>La opción <b>Copia JSON</b> permite trasladar de forma sencilla la configuración, las jornadas y los ingresos entre distintas instalaciones de Contabilidad Taxi. Es especialmente útil para trabajar habitualmente desde el teléfono y, cuando sea necesario, continuar en el PC con exactamente los mismos datos, o realizar el proceso a la inversa.</p>
+    <p><b>Del teléfono al PC:</b> en el teléfono entra en Configuración y pulsa <b>Copia JSON</b>. Envía o copia ese archivo al PC. Después abre Contabilidad Taxi en el PC, entra en Configuración y pulsa <b>Restaurar JSON</b> para seleccionar la copia procedente del teléfono. La app recuperará la configuración, las jornadas y los ingresos contenidos en esa copia.</p>
+    <p>Si en ese PC ya existe un <b>Excel vinculado</b>, después de restaurar la copia la aplicación preguntará automáticamente si quieres <b>actualizar ahora el Excel con los datos restaurados</b>. Si aceptas, se solicitará permiso de escritura cuando sea necesario y el libro se reconstruirá con la información que acaba de llegar desde el teléfono. Si decides no hacerlo en ese momento, el indicador mostrará <b>Excel pendiente de sincronizar</b> y podrás actualizarlo posteriormente con el botón <b>Sincronizar ahora</b>.</p>
+    <p>Si el PC todavía no tiene ningún Excel vinculado, la restauración del JSON seguirá siendo válida: primero tendrás todos los datos dentro de la PWA y después podrás usar <b>Crear / vincular Excel</b> para generar el libro a partir de ellos.</p>
+    <p><b>Del PC al teléfono:</b> realiza una <b>Copia JSON</b> en el PC, pásala al teléfono y usa <b>Restaurar JSON</b> desde la PWA del móvil. El teléfono recuperará la misma configuración, jornadas e ingresos. El vínculo con un archivo Excel no viaja dentro del JSON, porque ese vínculo pertenece al dispositivo y al navegador en el que se creó.</p>
+    <p><b>Importante:</b> Restaurar JSON sustituye los datos actuales de esa instalación por los de la copia seleccionada. Si quieres conservar el estado anterior, realiza antes una nueva <b>Copia JSON</b>. De esta forma puedes utilizar el JSON también como copia de seguridad antes de mover datos entre dispositivos.</p>
+  </section>
+
+  <section class="card">
+    <h2>14. Seguridad de los datos</h2>
     <p>La aplicación utiliza almacenamiento propio. Su service worker y su caché tienen nombres exclusivos y no enumeran, borran ni modifican cachés de otras PWA. Puedes crear además una copia JSON de todos tus datos desde Configuración.</p>
   </section>
 </div>

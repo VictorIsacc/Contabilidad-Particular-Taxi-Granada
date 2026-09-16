@@ -585,9 +585,18 @@ async function manualSyncExcel(){
   if(!state.excelHandle){await linkExcel();return}
   try{await writeExcelHandle(state.excelHandle,true);updateExcelStatus(true);toast('Excel sincronizado')}catch(e){alert(e.message);updateExcelStatus(false,true)}
 }
-function updateExcelStatus(ok=false,pending=false){
-  const el=$('#excelStatus');el.classList.toggle('ok',!!state.excelHandle&&!pending);
-  el.textContent=!state.excelHandle?'Excel sin vincular':pending?'Excel pendiente de permiso':ok?'Excel actualizado':'Excel vinculado';
+function updateExcelStatus(ok=false,pending=false,outdated=false){
+  const el=$('#excelStatus');
+  el.classList.toggle('ok',!!state.excelHandle&&!pending&&!outdated);
+  el.textContent=!state.excelHandle
+    ? 'Excel sin vincular'
+    : outdated
+      ? 'Excel pendiente de sincronizar'
+      : pending
+        ? 'Excel pendiente de permiso'
+        : ok
+          ? 'Excel actualizado'
+          : 'Excel vinculado';
 }
 
 function getPdfLib(){if(!window.jspdf?.jsPDF)throw new Error('La librería PDF no está disponible. Abre la app con conexión una vez.');return window.jspdf.jsPDF}
@@ -675,7 +684,49 @@ async function createSummaryPdf(){
 
 function backupJson(){const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),config:state.config,records:state.records,incomes:state.incomes},null,2)],{type:'application/json'});downloadBlob(blob,`Contabilidad_Taxi_backup_${todayISO()}.json`)}
 async function restoreJson(file){
-  try{const data=JSON.parse(await file.text());if(!data||!Array.isArray(data.records))throw new Error('Copia no válida');if(!confirm('Esto sustituirá la configuración y los datos actuales. ¿Continuar?'))return;state.config={...defaultConfig(),...(data.config||{}),modules:{...defaultConfig().modules,...(data.config?.modules||{})}};state.records=data.records||[];state.incomes=data.incomes||[];await persist();applyAppearance();syncConfigForm();renderDayFields();renderRecent();renderIncomes();refreshAnalysis();toast('Copia restaurada')}catch(e){alert(`No se pudo restaurar: ${e.message}`)}
+  try{
+    const data=JSON.parse(await file.text());
+    if(!data||!Array.isArray(data.records)) throw new Error('Copia no válida');
+    if(!confirm('Esto sustituirá la configuración y los datos actuales de esta instalación. ¿Continuar?')) return;
+
+    state.config={...defaultConfig(),...(data.config||{}),modules:{...defaultConfig().modules,...(data.config?.modules||{})}};
+    state.records=data.records||[];
+    state.incomes=data.incomes||[];
+    await persist();
+
+    applyAppearance();
+    syncConfigForm();
+    renderDayFields();
+    renderRecent();
+    renderIncomes();
+    refreshAnalysis();
+
+    if(state.excelHandle){
+      updateExcelStatus(false,false,true);
+      const syncNow=confirm('Copia JSON restaurada correctamente.\n\nEste dispositivo tiene un Excel vinculado. ¿Quieres actualizarlo ahora con los datos restaurados?');
+      if(syncNow){
+        try{
+          await writeExcelHandle(state.excelHandle,true);
+          updateExcelStatus(true);
+          toast('Copia restaurada y Excel actualizado');
+        }catch(syncError){
+          updateExcelStatus(false,true);
+          alert(`La copia se ha restaurado, pero no se pudo actualizar el Excel vinculado: ${syncError.message}\n\nPuedes intentarlo después con “Sincronizar ahora”.`);
+        }
+      }else{
+        updateExcelStatus(false,false,true);
+        toast('Copia restaurada · Excel pendiente de sincronizar');
+      }
+    }else{
+      updateExcelStatus();
+      toast('Copia restaurada');
+    }
+  }catch(e){
+    alert(`No se pudo restaurar: ${e.message}`);
+  }finally{
+    const input=$('#restoreBackupInput');
+    if(input) input.value='';
+  }
 }
 
 function setupEvents(){
