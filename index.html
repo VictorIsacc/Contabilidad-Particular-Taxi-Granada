@@ -14,38 +14,41 @@
 <body>
   <div id="appShell" class="app-shell">
     <header class="topbar">
-      <div class="brand">
-        <img src="logo-contabilidad-taxi.png" alt="Contabilidad Taxi" class="brand-icon brand-logo">
-        <div>
-          <h1>Contabilidad Taxi</h1>
-          <p id="profileBadge">Contabilidad taxi configurable</p>
+      <div class="topbar-main">
+        <div class="brand">
+          <img src="logo-contabilidad-taxi.png" alt="Contabilidad Taxi" class="brand-icon brand-logo">
+          <div class="brand-copy">
+            <h1>Contabilidad Taxi</h1>
+            <p id="profileBadge">Contabilidad taxi configurable</p>
+          </div>
+        </div>
+
+        <div class="header-primary-tools" aria-label="Apariencia y ayuda">
+          <div class="toolbar-group theme-group">
+            <span class="toolbar-label">Tema</span>
+            <button class="icon-btn" data-theme-choice="light" title="Modo claro" aria-label="Modo claro">☀</button>
+            <button class="icon-btn" data-theme-choice="dark" title="Modo oscuro" aria-label="Modo oscuro">☾</button>
+            <button class="icon-btn" data-theme-choice="system" title="Seguir sistema" aria-label="Seguir tema del sistema">A</button>
+          </div>
+          <a class="btn btn-secondary instructions-btn" href="instrucciones.html">Instrucciones</a>
         </div>
       </div>
-      <div class="top-actions">
+
+      <div class="header-secondary-tools">
+        <div class="toolbar-group">
+          <span class="toolbar-label">Zoom</span>
+          <button id="zoomOut" class="icon-btn" title="Reducir zoom">−</button>
+          <strong id="zoomValue">100%</strong>
+          <button id="zoomIn" class="icon-btn" title="Aumentar zoom">+</button>
+        </div>
+        <div class="toolbar-status">
+          <span id="excelStatus" class="status-pill">Excel sin vincular</span>
+        </div>
         <button id="installBtn" class="btn btn-secondary hidden">Instalar</button>
-        <a class="btn btn-ghost" href="instrucciones.html">Instrucciones</a>
       </div>
     </header>
 
-    <section class="toolbar card compact-card">
-      <div class="toolbar-group">
-        <span class="toolbar-label">Tema</span>
-        <button class="icon-btn" data-theme-choice="light" title="Modo claro">☀</button>
-        <button class="icon-btn" data-theme-choice="dark" title="Modo oscuro">☾</button>
-        <button class="icon-btn" data-theme-choice="system" title="Seguir sistema">A</button>
-      </div>
-      <div class="toolbar-group">
-        <span class="toolbar-label">Zoom</span>
-        <button id="zoomOut" class="icon-btn" title="Reducir zoom">−</button>
-        <strong id="zoomValue">100%</strong>
-        <button id="zoomIn" class="icon-btn" title="Aumentar zoom">+</button>
-      </div>
-      <div class="toolbar-status">
-        <span id="excelStatus" class="status-pill">Excel sin vincular</span>
-      </div>
-    </section>
-
-    <nav class="tabs" aria-label="Secciones">
+    <nav class="tabs tabs-sticky" aria-label="Secciones">
       <button class="tab active" data-tab="jornada">Jornada</button>
       <button class="tab" data-tab="analisis">Análisis</button>
       <button class="tab" data-tab="ingresos">Ingresos</button>
@@ -138,7 +141,36 @@
             <button class="chip" data-range="all">Todo</button>
           </div>
         </section>
-        <div id="analysisCards" class="kpi-grid"></div>
+        <div id="analysisCards" class="kpi-grid analysis-day-kpis"></div>
+        <div id="analysisPendingNotice" class="analysis-notice hidden"></div>
+
+        <section class="card analysis-cloud-summary">
+          <div class="card-title-row wrap-row analysis-summary-heading">
+            <div>
+              <h3>Totales y medias del período</h3>
+              <p>Resumen inspirado en el análisis de Contabilidad Taxi Cloud. La media se calcula solo sobre los días trabajados.</p>
+            </div>
+            <span id="analysisWorkdayBadge" class="status-pill">0 días trabajados</span>
+          </div>
+          <div class="analysis-cloud-grid">
+            <div class="analysis-period-block">
+              <div class="analysis-block-head"><div><span class="eyebrow">TOTAL</span><h3>Total del período</h3></div><small>Suma del mes o rango seleccionado</small></div>
+              <div id="analysisTotalsList" class="analysis-money-list"></div>
+            </div>
+            <div class="analysis-period-block average-block">
+              <div class="analysis-block-head"><div><span class="eyebrow">MEDIA</span><h3>Media por día trabajado</h3></div><small>Excluye días no trabajados</small></div>
+              <div id="analysisAveragesList" class="analysis-money-list"></div>
+            </div>
+          </div>
+        </section>
+
+        <section id="analysisLiquidationCard" class="card analysis-liquidation-card hidden">
+          <div class="card-title-row wrap-row">
+            <div><h3>Datos para la liquidación del período</h3><p>Referencia informativa. La nómina no modifica las fórmulas de las jornadas.</p></div>
+          </div>
+          <div id="analysisLiquidationGrid" class="analysis-liquidation-grid"></div>
+        </section>
+
         <section id="cashBreakdownCard" class="card hidden">
           <div class="card-title-row wrap-row">
             <div><h3>Efectivo para liquidación</h3><p>Opcional. Introduce las unidades de cada billete o moneda si vas a entregar efectivo al jefe. Se comparará con la liquidación del jefe del periodo.</p></div>
@@ -150,10 +182,16 @@
         <section class="card">
           <div class="card-title-row wrap-row">
             <div><h3>Detalle del periodo</h3><p id="analysisCaption"></p></div>
-            <div class="button-row">
-              <button id="pdfDetailBtn" class="btn btn-detail-pdf">PDF detallado</button>
-              <button id="pdfSummaryBtn" class="btn btn-pdf">PDF acumulado</button>
-              <button id="exportExcelBtn" class="btn btn-success">Exportar Excel actualizado</button>
+            <div class="analysis-export-tools">
+              <div id="pdfDriverOptions" class="pdf-inline-options">
+                <label><input id="pdfIncludeDriverNet" type="checkbox" checked> Incluir A percibir chofer</label>
+                <label><input id="pdfIncludeLiquidationRef" type="checkbox" checked> Incluir referencia de liquidación</label>
+              </div>
+              <div class="button-row">
+                <button id="pdfDetailBtn" class="btn btn-detail-pdf">PDF detallado</button>
+                <button id="pdfSummaryBtn" class="btn btn-pdf">PDF acumulado</button>
+                <button id="exportExcelBtn" class="btn btn-success">Exportar Excel actualizado</button>
+              </div>
             </div>
           </div>
           <div class="table-wrap"><table id="analysisTable"></table></div>
@@ -163,20 +201,53 @@
       <section id="tab-ingresos" class="tab-panel">
         <div class="section-heading">
           <div>
-            <h2>Ingresos independientes</h2>
-            <p>Para anotar ingresos que quieras conservar aparte de la jornada diaria.</p>
+            <h2>Ingresos · Caja diaria</h2>
+            <p>Registra cuántos billetes y monedas has ingresado. La app calcula automáticamente el importe por denominación y el total del día.</p>
           </div>
         </div>
-        <form id="incomeForm" class="card form-card">
-          <div class="form-grid">
-            <label class="field"><span>Fecha</span><input id="incomeDate" type="date" required></label>
-            <label class="field"><span>Concepto</span><input id="incomeConcept" type="text" maxlength="80" required placeholder="Ej. servicio especial"></label>
-            <label class="field"><span>Importe</span><div class="money-input"><input id="incomeAmount" type="number" min="0" step="0.01" required><b>€</b></div></label>
-            <label class="field"><span>Observación</span><input id="incomeNote" type="text" maxlength="160"></label>
+
+        <form id="incomeForm" class="card form-card income-cash-card">
+          <div class="income-topline">
+            <label class="field"><span>Fecha del ingreso</span><input id="incomeDate" type="date" required></label>
+            <div class="income-reference-box"><small>Referencia liquidación jefe</small><strong id="incomeTarget">0,00 €</strong><em>Se toma de la jornada guardada de esa fecha, si existe.</em></div>
           </div>
-          <div class="form-actions"><button class="btn btn-primary" type="submit">Añadir ingreso</button></div>
+
+          <div class="income-denom-section">
+            <div class="income-denom-head"><h3>Billetes</h3><p>Introduce unidades, no importes.</p></div>
+            <div id="incomeBills" class="income-denomination-grid"></div>
+          </div>
+          <div class="income-denom-section">
+            <div class="income-denom-head"><h3>Monedas</h3><p>Opcional. Útil cuando el ingreso incluye cambio.</p></div>
+            <div id="incomeCoins" class="income-denomination-grid"></div>
+          </div>
+
+          <div class="income-day-summary">
+            <div><small>Total contado</small><strong id="incomeCountedTotal">0,00 €</strong></div>
+            <div><small>Ingresado hoy</small><strong id="incomePaidTotal">0,00 €</strong></div>
+            <div><small>A deber</small><strong id="incomeOwed">0,00 €</strong></div>
+          </div>
+          <label class="field income-note"><span>Observación</span><input id="incomeNote" type="text" maxlength="160" placeholder="Opcional"></label>
+          <div class="form-actions">
+            <button class="btn btn-primary" type="submit">Guardar ingreso</button>
+            <button id="clearIncomeBtn" class="btn btn-soft" type="button">Limpiar</button>
+          </div>
         </form>
-        <section class="card"><div class="table-wrap"><table id="incomeTable"></table></div></section>
+
+        <section class="card">
+          <div class="card-title-row wrap-row">
+            <div><h3>Acumulado de ingresos</h3><p>Consulta por mes o por rango las unidades de cada denominación, el importe que suman y el total general.</p></div>
+            <div class="income-range-controls">
+              <button class="chip" type="button" data-income-range="month">Este mes</button>
+              <button class="chip" type="button" data-income-range="all">Todo</button>
+              <input id="incomeRangeFrom" type="date">
+              <span>—</span>
+              <input id="incomeRangeTo" type="date">
+              <button id="applyIncomeRange" class="btn btn-soft" type="button">Aplicar</button>
+            </div>
+          </div>
+          <div id="incomePeriodSummary" class="income-period-summary"></div>
+          <div class="table-wrap"><table id="incomeTable"></table></div>
+        </section>
       </section>
 
       <section id="tab-configuracion" class="tab-panel">

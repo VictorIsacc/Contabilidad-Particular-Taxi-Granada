@@ -15,15 +15,14 @@
   <section class="card">
     <h2>1. Configuración inicial</h2>
     <p>Elige si trabajas como <b>Chofer</b> o como <b>Titular</b>. Después activa únicamente las columnas y módulos que utilizas. La configuración determina qué campos aparecen cada día, qué cálculos realiza la app y qué columnas se crean en el Excel.</p>
-    <p>Puedes activar de forma independiente Tarjeta/TPV, Uber, Uber Cash, FreeNow, FreeNow Cash, Abonados, Imbric, JoinUp, Gasolina, Lavado, kilometraje y otros conceptos de empresa personalizados.</p>
+    <p>Puedes activar de forma independiente Tarjeta/TPV, Uber, Uber Cash, FreeNow, FreeNow Cash, Abonados, Imbric, JoinUp, Gasolina, Lavado, kilometraje y otros conceptos de empresa personalizados. No existe una columna genérica de Efectivo en Jornada: el efectivo ordinario forma parte del Cierre PideTaxi y el recuento físico se realiza en Ingresos.</p>
   </section>
 
   <section class="card">
     <h2>2. Estado de la jornada</h2>
-    <p>Cada fecha puede marcarse como <b>Trabajo, Descanso, Vacaciones, Baja, Taller u Otro</b>.</p>
-    <p>Si dentro del periodo analizado existe un día sin importes ni estado confirmado, la app lo tratará de forma provisional como <b>Descanso pendiente de concretar</b>. En el análisis se indicará expresamente cuántos días están pendientes para distinguirlos de los descansos confirmados y evitar que un olvido de introducir datos quede registrado como un descanso definitivo.</p>
-    <p>Cuando posteriormente se concrete ese día, podrá confirmarse como <b>Descanso</b> o cambiarse a Trabajo, Vacaciones, Baja, Taller u Otro. Los estados confirmados son los que forman el histórico definitivo y los que se guardan como tales en el Excel.</p>
-    <p>Cuando el estado confirmado no es Trabajo, los importes económicos de ese día quedan a cero. Los análisis y PDF pueden mostrar el total de días trabajados, los descansos confirmados, los días pendientes de concretar y el desglose de los demás días no trabajados por motivo.</p>
+    <p>Cada fecha puede marcarse como <b>Trabajo, Descanso, Vacaciones, Baja, Taller u Otro</b>. Si dentro del periodo analizado existe una fecha sin importes ni estado confirmado, la app la toma de forma provisional como <b>Descanso provisional · Pendiente</b>.</p>
+    <p>Ese descanso provisional <b>no se considera un descanso confirmado</b>. En Análisis aparece un aviso con el número de días pendientes de concretar y sus fechas, para que posteriormente se indique si fueron realmente Descanso, Trabajo, Vacaciones, Baja, Taller u Otro.</p>
+    <p>Cuando el estado no es Trabajo, los importes económicos de ese día quedan a cero. El Excel identifica además si el día está <b>Concretado</b> o sigue pendiente. Los análisis y PDF separan los descansos confirmados de los provisionales para evitar que un día olvidado quede definitivamente contabilizado como descanso.</p>
   </section>
 
   <section class="card">
@@ -78,13 +77,23 @@
   </section>
 
   <section class="card">
-    <h2>11. Excel, análisis y PDF</h2>
-    <p>Contabilidad Taxi guarda cada jornada dentro de la PWA y, cuando el navegador lo permite, puede vincular un Excel para actualizarlo después de cada jornada. En navegadores sin acceso directo a archivos puedes descargar en cualquier momento un Excel actualizado.</p>
-    <p>La pestaña Análisis permite elegir un rango de fechas y generar PDF detallado o acumulado. Los informes usan la línea visual de la app: cabecera azul marino, bloques claros y botones de exportación diferenciados. Los importes negativos se muestran en rojo, incluida la fila final de totales del PDF detallado.</p>
+    <h2>11. Ingresos · Caja diaria</h2>
+    <p>La pestaña <b>Ingresos</b> funciona como un control de caja independiente de la introducción de importes de la jornada. En lugar de escribir un importe total, se indican las <b>unidades de cada billete y moneda</b> que se han ingresado. La app calcula automáticamente el importe que aporta cada denominación y el <b>Total ingresado del día</b>.</p>
+    <p>Se pueden registrar billetes de 100 €, 50 €, 20 €, 10 € y 5 €, y monedas de 2 €, 1 €, 0,50 €, 0,20 €, 0,10 €, 0,05 €, 0,02 € y 0,01 €. Las monedas son opcionales: si no se utilizan, basta con dejarlas a cero.</p>
+    <p>Cuando el perfil es Chofer y existe una jornada guardada para esa misma fecha, la app toma como referencia la <b>Liquidación jefe</b> de ese día. El total contado se muestra como <b>Ingresado hoy</b> y <b>A deber</b> indica la diferencia pendiente cuando lo ingresado es inferior a la liquidación de referencia. Si no existe una jornada de referencia, o en perfil Titular, la pestaña sigue sirviendo como registro de caja sin generar por sí sola una deuda.</p>
+    <p>El botón <b>Guardar ingreso</b> almacena la caja de esa fecha. Si ya existe un ingreso guardado para el mismo día, la app pide confirmación antes de sustituirlo, evitando duplicados al corregir una cantidad. Al seleccionar una fecha con datos guardados, se recuperan sus unidades para poder consultarlas o modificarlas.</p>
+    <p>El bloque <b>Acumulado de ingresos</b> permite consultar un mes o cualquier rango de fechas. Muestra el número total de unidades de cada denominación, el importe que suman, el total general ingresado y, cuando corresponde, la referencia acumulada de liquidaciones y el importe pendiente. <b>No se utiliza remanente mensual</b>: el acumulado se construye únicamente con los ingresos efectivamente guardados dentro del periodo seleccionado.</p>
+    <p>Los ingresos guardados también se incluyen en la hoja <b>Ingresos</b> del Excel, con las unidades y el importe de cada denominación, el total ingresado, la referencia de liquidación, el posible importe a deber y la observación del día.</p>
   </section>
 
   <section class="card">
-    <h2>12. Seguridad de los datos</h2>
+    <h2>12. Excel, análisis y PDF</h2>
+    <p>Contabilidad Taxi guarda cada jornada dentro de la PWA y, cuando el navegador lo permite, puede vincular un Excel para actualizarlo después de cada jornada. En navegadores sin acceso directo a archivos puedes descargar en cualquier momento un Excel actualizado.</p>
+    <p>La pestaña <b>Análisis</b> muestra, al estilo de Contabilidad Taxi Cloud, dos bloques paralelos: <b>Total del período</b> y <b>Media por día trabajado</b>. Incluye las líneas activas de PideTaxi, Uber, FreeNow, Cash, Abonados, JoinUp, Imbric, comisiones, reparto, seguro, TPV, gastos, kilometraje, Liquidación jefe y A percibir chofer. Las líneas principales se identifican mediante colores para facilitar la lectura y los importes negativos aparecen en rojo.</p><p>En perfil Chofer se muestra además un bloque de <b>Datos para la liquidación del período</b> con Liquidación jefe, A percibir chofer y, cuando esté configurada, la Nómina de referencia y el resultado de Nómina + Liquidación jefe.</p><p>El PDF acumulado dispone de opciones para <b>incluir A percibir chofer</b> y <b>añadir la referencia de liquidación</b>. Su tabla es compacta y muestra Total del período y Media por día trabajado con las mismas referencias de color que el análisis.</p><p>La pestaña Análisis permite elegir un rango de fechas y generar PDF detallado o acumulado. Si faltan jornadas por concretar, el análisis las incluye provisionalmente como descanso y muestra una advertencia específica; el PDF acumulado distingue también los descansos confirmados de los provisionales. Los informes usan la línea visual de la app: cabecera azul marino, bloques claros y botones de exportación diferenciados. Los importes negativos se muestran en rojo, incluida la fila final de totales del PDF detallado.</p>
+  </section>
+
+  <section class="card">
+    <h2>13. Seguridad de los datos</h2>
     <p>La aplicación utiliza almacenamiento propio. Su service worker y su caché tienen nombres exclusivos y no enumeran, borran ni modifican cachés de otras PWA. Puedes crear además una copia JSON de todos tus datos desde Configuración.</p>
   </section>
 </div>

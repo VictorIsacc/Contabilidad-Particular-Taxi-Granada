@@ -40,3 +40,69 @@ td.total-cell.amount-negative{background:color-mix(in srgb,var(--danger) 8%,var(
 
 .nonwork-day #dynamicFields,.nonwork-day #customDayFields{opacity:.48;filter:grayscale(.15)}
 .nonwork-day .calc-panel{opacity:.78}
+
+/* V1.4 · días sin datos / descanso provisional */
+.analysis-notice{margin:-4px 0 16px;padding:13px 15px;border-radius:14px;border:1px solid color-mix(in srgb,#d57b20 45%,var(--border));background:color-mix(in srgb,#d57b20 9%,var(--surface));color:var(--text);line-height:1.45}.analysis-notice b{color:#d57b20}.pending-row td{background:color-mix(in srgb,#d57b20 6%,var(--surface))!important}.pending-row td:nth-child(2){color:#d57b20;font-weight:800}
+
+
+/* V1.5 · Cabecera compacta y navegación siempre visible */
+.topbar{display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:10px;margin-bottom:0;padding:10px 0 12px}
+.topbar-main{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.brand-copy{min-width:0}
+.header-primary-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-left:auto}
+.header-secondary-tools{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap;padding-top:8px;border-top:1px solid var(--border)}
+.theme-group{padding:5px 7px;border-radius:13px;background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow)}
+.instructions-btn{min-height:36px;white-space:nowrap}
+.tabs.tabs-sticky{position:sticky;top:0;z-index:60;margin:0 0 16px;padding:9px 0;background:color-mix(in srgb,var(--bg) 94%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid color-mix(in srgb,var(--border) 75%,transparent);box-shadow:0 8px 18px rgba(10,25,45,.05)}
+.tabs.tabs-sticky .tab{flex:0 0 auto}
+@media(max-width:720px){
+  .topbar{padding-top:4px}
+  .brand-logo{width:62px;height:62px;border-radius:16px}
+  .brand-copy h1{font-size:1.15em}
+  .brand-copy p{font-size:.82em}
+  .header-primary-tools{padding-left:0;margin-top:0;width:100%;gap:8px}
+  .theme-group{flex:1 1 auto;justify-content:flex-start;gap:7px}
+  .instructions-btn{flex:0 0 auto}
+  .header-secondary-tools{gap:8px;padding-top:9px}
+  .header-secondary-tools .toolbar-status{flex:1 1 100%}
+  .tabs.tabs-sticky{top:0;z-index:70;margin-left:-10px;margin-right:-10px;padding:8px 10px;scrollbar-width:none}
+  .tabs.tabs-sticky::-webkit-scrollbar{display:none}
+}
+
+/* ===== V1.6 · Ingresos por billetes y monedas ===== */
+.income-cash-card{overflow:visible}
+.income-topline{display:grid;grid-template-columns:minmax(220px,.55fr) minmax(260px,1fr);gap:14px;align-items:end;margin-bottom:4px}
+.income-reference-box{background:linear-gradient(135deg,rgba(28,77,112,.12),rgba(18,50,74,.04));border:1px solid var(--border);border-radius:14px;padding:12px 14px;min-height:74px;display:flex;flex-direction:column;justify-content:center}
+.income-reference-box small{color:var(--muted);font-weight:800}.income-reference-box strong{font-size:1.45em;margin-top:2px;font-variant-numeric:tabular-nums}.income-reference-box em{font-size:.72em;color:var(--muted);font-style:normal;margin-top:2px}
+.income-denom-section{margin-top:16px}.income-denom-head{display:flex;align-items:end;justify-content:space-between;gap:12px;margin-bottom:8px}.income-denom-head h3{margin:0}.income-denom-head p{margin:0;color:var(--muted);font-size:.78em}
+.income-denomination-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(108px,1fr));gap:9px}
+.income-denomination-item{background:var(--surface-2);border:1px solid var(--border);border-radius:13px;padding:10px;text-align:center;box-shadow:0 5px 14px rgba(0,0,0,.05)}
+.income-denomination-item span{display:block;font-weight:900;font-size:1.05em;margin-bottom:7px}.income-denomination-item input{width:100%;text-align:center;font-size:1.08em;font-weight:800;border-radius:9px;padding:9px}.income-denomination-item small{display:block;color:var(--muted);font-weight:800;margin-top:7px;font-variant-numeric:tabular-nums}
+.income-day-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:16px}.income-day-summary>div,.income-kpis>div{background:var(--surface-2);border:1px solid var(--border);border-radius:13px;padding:11px 13px}.income-day-summary small,.income-kpis small{display:block;color:var(--muted);font-size:.75em;font-weight:800}.income-day-summary strong,.income-kpis strong{display:block;font-size:1.25em;margin-top:3px;font-variant-numeric:tabular-nums}.income-note{margin-top:14px}
+.income-range-controls{display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.income-range-controls input{background:var(--surface-2);color:var(--text);border:1px solid var(--border);border-radius:9px;padding:8px 9px}
+.income-period-summary{margin:12px 0}.income-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:12px}.income-denom-summary table{min-width:420px}.income-denom-summary th:nth-child(n+2),.income-denom-summary td:nth-child(n+2){text-align:right}
+@media(max-width:760px){.income-topline{grid-template-columns:1fr}.income-day-summary{grid-template-columns:1fr}.income-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.income-range-controls{justify-content:flex-start}.income-denom-head{align-items:flex-start;flex-direction:column}.income-denomination-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+
+/* ===== V1.7 · Análisis estilo Contabilidad Taxi Cloud ===== */
+.analysis-day-kpis{grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px}
+.analysis-day-kpis .kpi{padding:13px 15px}.analysis-day-kpis .kpi strong{font-size:1.35em}
+.analysis-cloud-summary{padding:16px}.analysis-summary-heading{margin-bottom:12px}.analysis-summary-heading h3{margin-bottom:4px}
+.analysis-cloud-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}
+.analysis-period-block{min-width:0;background:color-mix(in srgb,var(--surface-2) 68%,var(--surface));border:1px solid var(--border);border-radius:16px;padding:12px;overflow:hidden}
+.analysis-period-block.average-block{border-color:color-mix(in srgb,#35c989 28%,var(--border));background:linear-gradient(145deg,color-mix(in srgb,#35c989 5%,var(--surface)),var(--surface))}
+.analysis-block-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:0 2px 9px}.analysis-block-head h3{margin:0;font-size:1.05em}.analysis-block-head small{color:var(--muted);font-size:.72em;text-align:right}.eyebrow{display:block;color:var(--muted);font-size:.67em;font-weight:900;letter-spacing:.12em;margin-bottom:4px}
+.analysis-money-list{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--surface)}
+.analysis-money-row{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(110px,.7fr);align-items:center;min-height:36px;border-bottom:1px solid var(--border);position:relative}.analysis-money-row:last-child{border-bottom:0}.analysis-money-row:nth-child(odd){background:color-mix(in srgb,var(--surface-2) 60%,var(--surface))}.analysis-money-row span,.analysis-money-row strong{padding:8px 11px}.analysis-money-row span{color:var(--muted);font-size:.82em}.analysis-money-row strong{border-left:1px solid var(--border);text-align:right;font-size:.88em;font-variant-numeric:tabular-nums}.analysis-money-row[class*="tone-"] span,.analysis-money-row[class*="tone-"] strong{font-weight:900;color:var(--text)}.analysis-money-row[class*="tone-"]::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px}
+.analysis-money-row.tone-total{background:color-mix(in srgb,#5f96ff 12%,var(--surface))}.analysis-money-row.tone-total::before{background:#5f96ff}
+.analysis-money-row.tone-pidetaxi{background:color-mix(in srgb,#f0bd50 12%,var(--surface))}.analysis-money-row.tone-pidetaxi::before{background:#f0bd50}
+.analysis-money-row.tone-uber{background:color-mix(in srgb,#9c7cff 12%,var(--surface))}.analysis-money-row.tone-uber::before{background:#9c7cff}
+.analysis-money-row.tone-freenow{background:color-mix(in srgb,#39b9a6 11%,var(--surface))}.analysis-money-row.tone-freenow::before{background:#39b9a6}
+.analysis-money-row.tone-card{background:color-mix(in srgb,#3dc1d3 11%,var(--surface))}.analysis-money-row.tone-card::before{background:#3dc1d3}
+.analysis-money-row.tone-boss{background:color-mix(in srgb,#f0944d 12%,var(--surface))}.analysis-money-row.tone-boss::before{background:#f0944d}
+.analysis-money-row.tone-remain{background:color-mix(in srgb,#35c989 13%,var(--surface))}.analysis-money-row.tone-remain::before{background:#35c989}
+.analysis-liquidation-card{padding:16px}.analysis-liquidation-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}.analysis-liquidation-item{border:1px solid var(--border);background:var(--surface-2);border-radius:14px;padding:13px 14px;min-height:82px}.analysis-liquidation-item small{display:block;color:var(--muted);font-weight:800;font-size:.76em}.analysis-liquidation-item strong{display:block;font-size:1.35em;margin-top:7px;text-align:right;font-variant-numeric:tabular-nums}.analysis-liquidation-item em{display:block;color:var(--muted);font-style:normal;font-size:.7em;margin-top:3px;text-align:right}.analysis-liquidation-item.boss{border-color:color-mix(in srgb,#f0944d 40%,var(--border));background:color-mix(in srgb,#f0944d 6%,var(--surface))}.analysis-liquidation-item.reference{border-color:color-mix(in srgb,#35c989 42%,var(--border));background:color-mix(in srgb,#35c989 7%,var(--surface))}.analysis-liquidation-item.reference strong,.analysis-liquidation-item.driver strong{color:var(--good)}
+.analysis-export-tools{display:flex;flex-direction:column;align-items:flex-end;gap:9px}.pdf-inline-options{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.pdf-inline-options label{display:flex;align-items:center;gap:6px;padding:7px 9px;border:1px solid var(--border);border-radius:10px;background:var(--surface-2);font-size:.76em;color:var(--muted);font-weight:750}.pdf-inline-options input{width:17px;height:17px}
+@media(max-width:900px){.analysis-cloud-grid{grid-template-columns:1fr}.analysis-export-tools{align-items:flex-start}.pdf-inline-options{justify-content:flex-start}}
+@media(max-width:620px){.analysis-money-row{grid-template-columns:minmax(0,1.25fr) minmax(100px,.75fr)}.analysis-money-row span,.analysis-money-row strong{padding:8px 9px}.analysis-liquidation-grid{grid-template-columns:1fr 1fr}}
