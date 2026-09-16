@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="es" data-theme="system">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#111827">
+  <meta name="description" content="PWA configurable de contabilidad diaria para taxi">
+  <title>TaxiCuenta</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon-192.png" sizes="192x192">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="appShell" class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <img src="logo-contabilidad-taxi.png" alt="Contabilidad Taxi" class="brand-icon brand-logo">
+        <div>
+          <h1>TaxiCuenta</h1>
+          <p id="profileBadge">Contabilidad taxi configurable</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button id="installBtn" class="btn btn-secondary hidden">Instalar</button>
+        <a class="btn btn-ghost" href="instrucciones.html">Instrucciones</a>
+      </div>
+    </header>
+
+    <section class="toolbar card compact-card">
+      <div class="toolbar-group">
+        <span class="toolbar-label">Tema</span>
+        <button class="icon-btn" data-theme-choice="light" title="Modo claro">☀</button>
+        <button class="icon-btn" data-theme-choice="dark" title="Modo oscuro">☾</button>
+        <button class="icon-btn" data-theme-choice="system" title="Seguir sistema">A</button>
+      </div>
+      <div class="toolbar-group">
+        <span class="toolbar-label">Zoom</span>
+        <button id="zoomOut" class="icon-btn" title="Reducir zoom">−</button>
+        <strong id="zoomValue">100%</strong>
+        <button id="zoomIn" class="icon-btn" title="Aumentar zoom">+</button>
+      </div>
+      <div class="toolbar-status">
+        <span id="excelStatus" class="status-pill">Excel sin vincular</span>
+      </div>
+    </section>
+
+    <nav class="tabs" aria-label="Secciones">
+      <button class="tab active" data-tab="jornada">Jornada</button>
+      <button class="tab" data-tab="analisis">Análisis</button>
+      <button class="tab" data-tab="ingresos">Ingresos</button>
+      <button class="tab" data-tab="configuracion">Configuración</button>
+    </nav>
+
+    <main>
+      <section id="tab-jornada" class="tab-panel active">
+        <div class="section-heading">
+          <div>
+            <h2>Nueva jornada</h2>
+            <p>Introduce únicamente los conceptos que tengas activados en tu perfil.</p>
+          </div>
+          <button id="todayBtn" class="btn btn-secondary">Hoy</button>
+        </div>
+
+        <form id="dayForm" class="card form-card">
+          <div class="form-grid fixed-grid">
+            <label class="field">
+              <span>Fecha</span>
+              <input id="dayDate" type="date" required>
+            </label>
+            <label class="field emphasis-field">
+              <span>Recaudación total del día</span>
+              <div class="money-input"><input id="dayTotal" type="number" min="0" step="0.01" inputmode="decimal" required><b>€</b></div>
+            </label>
+          </div>
+
+          <div id="dynamicFields" class="form-grid"></div>
+          <div id="customDayFields" class="form-grid"></div>
+
+          <label class="field field-wide">
+            <span>Notas de la jornada</span>
+            <textarea id="dayNotes" rows="3" placeholder="Opcional"></textarea>
+          </label>
+
+          <section id="liveSummary" class="calc-panel"></section>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Guardar jornada</button>
+            <button type="button" id="clearDayBtn" class="btn btn-secondary">Limpiar</button>
+          </div>
+        </form>
+
+        <section class="card">
+          <div class="card-title-row">
+            <div>
+              <h3>Últimas jornadas</h3>
+              <p>Los datos se guardan también dentro de la PWA para no depender únicamente del Excel.</p>
+            </div>
+          </div>
+          <div class="table-wrap"><table id="recentTable"></table></div>
+        </section>
+      </section>
+
+      <section id="tab-analisis" class="tab-panel">
+        <div class="section-heading">
+          <div>
+            <h2>Análisis por periodo</h2>
+            <p>Selecciona un rango y genera el resumen o el detalle en PDF.</p>
+          </div>
+        </div>
+        <section class="card">
+          <div class="range-row">
+            <label class="field"><span>Desde</span><input id="rangeFrom" type="date"></label>
+            <label class="field"><span>Hasta</span><input id="rangeTo" type="date"></label>
+            <button id="applyRange" class="btn btn-primary" type="button">Aplicar rango</button>
+          </div>
+          <div class="quick-range">
+            <button class="chip" data-range="month">Este mes</button>
+            <button class="chip" data-range="year">Este año</button>
+            <button class="chip" data-range="all">Todo</button>
+          </div>
+        </section>
+        <div id="analysisCards" class="kpi-grid"></div>
+        <section class="card">
+          <div class="card-title-row wrap-row">
+            <div><h3>Detalle del periodo</h3><p id="analysisCaption"></p></div>
+            <div class="button-row">
+              <button id="pdfDetailBtn" class="btn btn-secondary">PDF detallado</button>
+              <button id="pdfSummaryBtn" class="btn btn-secondary">PDF acumulado</button>
+              <button id="exportExcelBtn" class="btn btn-secondary">Exportar Excel actualizado</button>
+            </div>
+          </div>
+          <div class="table-wrap"><table id="analysisTable"></table></div>
+        </section>
+      </section>
+
+      <section id="tab-ingresos" class="tab-panel">
+        <div class="section-heading">
+          <div>
+            <h2>Ingresos independientes</h2>
+            <p>Para anotar ingresos que quieras conservar aparte de la jornada diaria.</p>
+          </div>
+        </div>
+        <form id="incomeForm" class="card form-card">
+          <div class="form-grid">
+            <label class="field"><span>Fecha</span><input id="incomeDate" type="date" required></label>
+            <label class="field"><span>Concepto</span><input id="incomeConcept" type="text" maxlength="80" required placeholder="Ej. servicio especial"></label>
+            <label class="field"><span>Importe</span><div class="money-input"><input id="incomeAmount" type="number" min="0" step="0.01" required><b>€</b></div></label>
+            <label class="field"><span>Observación</span><input id="incomeNote" type="text" maxlength="160"></label>
+          </div>
+          <div class="form-actions"><button class="btn btn-primary" type="submit">Añadir ingreso</button></div>
+        </form>
+        <section class="card"><div class="table-wrap"><table id="incomeTable"></table></div></section>
+      </section>
+
+      <section id="tab-configuracion" class="tab-panel">
+        <div class="section-heading">
+          <div>
+            <h2>Configuración</h2>
+            <p>Las columnas del Excel y de la aplicación nacen de este perfil.</p>
+          </div>
+        </div>
+        <form id="configForm" class="card form-card">
+          <div class="config-section">
+            <h3>Perfil</h3>
+            <div class="choice-grid">
+              <label class="choice-card"><input type="radio" name="profile" value="driver"><span><b>Chofer</b><small>Permite reparto, seguro y liquidación jefe/chofer.</small></span></label>
+              <label class="choice-card"><input type="radio" name="profile" value="owner"><span><b>Titular</b><small>Sin reparto obligatorio; muestra facturación y resultado tras gastos.</small></span></label>
+            </div>
+            <div class="form-grid">
+              <label class="field switch-field"><span>Aplicar reparto</span><input id="splitEnabled" type="checkbox"></label>
+              <label class="field"><span>Porcentaje chofer</span><div class="money-input"><input id="splitPct" type="number" min="0" max="100" step="0.01"><b>%</b></div></label>
+              <label class="field switch-field"><span>Descontar seguro al chofer</span><input id="insuranceEnabled" type="checkbox"></label>
+              <label class="field"><span>Seguro diario</span><div class="money-input"><input id="insuranceDaily" type="number" min="0" step="0.01"><b>€</b></div></label>
+            </div>
+          </div>
+
+          <div class="config-section">
+            <h3>Columnas activas</h3>
+            <p class="muted">Activa solamente aquello que utilices. Uber Cash y FreeNow Cash son independientes de la plataforma principal.</p>
+            <div id="moduleChoices" class="module-grid"></div>
+          </div>
+
+          <div class="config-section">
+            <div class="card-title-row">
+              <div><h3>Otros conceptos de empresa</h3><p class="muted">Se descuentan de la parte del jefe cuando exista reparto y del resultado real del titular.</p></div>
+              <button id="addCustomConcept" type="button" class="btn btn-secondary">Añadir concepto</button>
+            </div>
+            <div id="customConceptList" class="custom-list"></div>
+          </div>
+
+          <div class="config-section">
+            <h3>Excel</h3>
+            <p class="muted">En Chrome/Edge de escritorio puedes crear o vincular un archivo que la app irá actualizando. En navegadores sin acceso directo a archivos, la app conserva los datos internamente y permite descargar el Excel actualizado.</p>
+            <div class="button-row">
+              <button id="linkExcelBtn" type="button" class="btn btn-primary">Crear / vincular Excel</button>
+              <button id="syncExcelBtn" type="button" class="btn btn-secondary">Sincronizar ahora</button>
+              <button id="downloadBackupBtn" type="button" class="btn btn-secondary">Copia JSON</button>
+              <label class="btn btn-secondary file-label">Restaurar JSON<input id="restoreBackupInput" type="file" accept="application/json" hidden></label>
+            </div>
+          </div>
+
+          <div class="form-actions sticky-actions">
+            <button type="submit" class="btn btn-primary">Guardar configuración</button>
+          </div>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="setupDialog" class="setup-dialog">
+    <form method="dialog" id="setupForm">
+      <div class="setup-hero">
+        <img src="icon-192.png" alt="">
+        <div><h2>Configura tu TaxiCuenta</h2><p>La app creará su estructura según cómo trabajes.</p></div>
+      </div>
+      <div class="setup-body">
+        <label class="field"><span>Perfil inicial</span><select id="setupProfile"><option value="driver">Chofer</option><option value="owner">Titular de licencia</option></select></label>
+        <label class="field"><span>Seguro diario del chofer</span><div class="money-input"><input id="setupInsurance" type="number" min="0" step="0.01" value="0"><b>€</b></div></label>
+        <p class="muted">Después podrás activar o desactivar Uber, Uber Cash, FreeNow, FreeNow Cash, Tarjeta, Abonados, Imbric, JoinUp, gasolina, lavado y el resto de conceptos.</p>
+      </div>
+      <div class="dialog-actions"><button value="cancel" class="btn btn-secondary">Cerrar</button><button id="finishSetup" value="default" class="btn btn-primary">Crear perfil</button></div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

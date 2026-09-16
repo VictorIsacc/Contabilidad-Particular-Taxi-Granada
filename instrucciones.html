@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="es" data-theme="system">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#111827"><title>Instrucciones · TaxiCuenta</title>
+  <link rel="manifest" href="manifest.webmanifest"><link rel="stylesheet" href="styles.css"><link rel="icon" href="icon-192.png">
+</head>
+<body>
+<div class="app-shell">
+  <header class="topbar">
+    <div class="brand"><img src="logo-contabilidad-taxi.png" class="brand-icon brand-logo" alt="Contabilidad Taxi"><div><h1>TaxiCuenta</h1><p>Guía de funcionamiento</p></div></div>
+    <a class="btn btn-primary" href="index.html">Volver a la app</a>
+  </header>
+
+  <section class="card">
+    <h2>1. Configuración inicial</h2>
+    <p>Elige si trabajas como chofer o como titular. Después activa únicamente las columnas que utilizas. La configuración determina qué campos aparecen cada día y qué columnas se crean en el Excel.</p>
+    <p>Puedes activar de forma independiente Tarjeta, Uber, Uber Cash, FreeNow, FreeNow Cash, Abonados, Imbric, JoinUp, Gasolina, Lavado y cualquier concepto de empresa que añadas tú mismo.</p>
+  </section>
+
+  <section class="card">
+    <h2>2. Cómo se calcula una jornada de chofer</h2>
+    <p>La app parte de la recaudación total del día. A Imbric se le aplica un 12% de descuento y a JoinUp un 10%. Esos descuentos reducen la base diaria antes de realizar el reparto, ya que son importes que no se cobran finalmente.</p>
+    <p>Si el reparto está activo, la app calcula la parte del chofer y la parte del jefe según el porcentaje configurado. Al chofer se le descuenta el seguro diario si está activado.</p>
+    <p>De la parte del jefe se descuentan los importes que ya cobra o que corresponden a la empresa: Tarjeta, Uber, FreeNow, Abonados, Imbric neto, JoinUp neto, Gasolina, Lavado y los otros conceptos de empresa configurados. Después se suman Uber Cash y FreeNow Cash, porque esos importes figuran como cobrados por el chofer.</p>
+  </section>
+
+  <section class="card">
+    <h2>3. Uber Cash y FreeNow Cash pagados finalmente con TPV</h2>
+    <p>La liquidación no necesita una segunda corrección. Si parte de un servicio que Uber o FreeNow declara como Cash se cobra finalmente con el TPV del jefe, ese importe ya forma parte del total de Tarjeta que se descuenta de la parte del jefe. Por tanto, el Cash declarado por las plataformas se sigue sumando completo en la liquidación.</p>
+    <p>Los campos “Uber Cash cobrado por TPV” y “FreeNow Cash cobrado por TPV” son informativos. Sirven para que el titular pueda conocer cuánto efectivo real hubo. La app calcula el efectivo real de plataforma como Cash declarado menos Cash cobrado por TPV, pero ese cálculo informativo no vuelve a intervenir en la liquidación jefe/chofer.</p>
+  </section>
+
+  <section class="card">
+    <h2>4. Perfil de titular</h2>
+    <p>En un perfil de titular no es obligatorio aplicar reparto ni seguro. La app muestra la facturación ajustada por las comisiones de Imbric y JoinUp y puede descontar Gasolina, Lavado y otros conceptos de empresa para mostrar un resultado real después de gastos.</p>
+    <p>Uber Cash y FreeNow Cash no se añaden a la facturación del titular porque ya forman parte de los totales de esas plataformas. Los campos Cash/TPV permiten únicamente conciliar dónde se cobró realmente el dinero.</p>
+  </section>
+
+  <section class="card">
+    <h2>5. Excel, análisis y PDF</h2>
+    <p>TaxiCuenta guarda cada jornada dentro de la PWA y, cuando el navegador lo permite, puede vincular un Excel para actualizarlo después de cada jornada. En navegadores sin acceso directo a archivos puedes descargar en cualquier momento un Excel actualizado.</p>
+    <p>La pestaña Análisis permite elegir un rango de fechas y generar dos documentos: PDF detallado, con las jornadas del periodo, y PDF acumulado, con los totales.</p>
+  </section>
+
+  <section class="card">
+    <h2>6. Seguridad de los datos</h2>
+    <p>La aplicación utiliza almacenamiento propio. Su service worker y su caché tienen nombres exclusivos y no borran ni modifican cachés de otras PWA. Puedes crear además una copia JSON de todos tus datos desde Configuración.</p>
+  </section>
+</div>
+<script>
+  const savedTheme=localStorage.getItem('taxicuenta_theme')||'system';
+  const savedZoom=Number(localStorage.getItem('taxicuenta_zoom')||1);
+  document.documentElement.dataset.theme=savedTheme;
+  document.documentElement.style.setProperty('--ui-scale',savedZoom);
+</script>
+</body></html>
