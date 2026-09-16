@@ -1,7 +1,7 @@
 {
   "id":"./taxicuenta-pwa-v1",
-  "name":"TaxiCuenta - Contabilidad Taxi",
-  "short_name":"TaxiCuenta",
+  "name":"Contabilidad Taxi",
+  "short_name":"Contabilidad Taxi",
   "description":"Contabilidad diaria configurable para taxi",
   "lang":"es",
   "start_url":"./index.html",

@@ -2,50 +2,90 @@
 <html lang="es" data-theme="system">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#111827"><title>Instrucciones · TaxiCuenta</title>
+  <meta name="theme-color" content="#111827"><title>Instrucciones · Contabilidad Taxi</title>
   <link rel="manifest" href="manifest.webmanifest"><link rel="stylesheet" href="styles.css"><link rel="icon" href="icon-192.png">
 </head>
 <body>
 <div class="app-shell">
   <header class="topbar">
-    <div class="brand"><img src="logo-contabilidad-taxi.png" class="brand-icon brand-logo" alt="Contabilidad Taxi"><div><h1>TaxiCuenta</h1><p>Guía de funcionamiento</p></div></div>
+    <div class="brand"><img src="logo-contabilidad-taxi.png" class="brand-icon brand-logo" alt="Contabilidad Taxi"><div><h1>Contabilidad Taxi</h1><p>Guía de funcionamiento</p></div></div>
     <a class="btn btn-primary" href="index.html">Volver a la app</a>
   </header>
 
   <section class="card">
     <h2>1. Configuración inicial</h2>
-    <p>Elige si trabajas como chofer o como titular. Después activa únicamente las columnas que utilizas. La configuración determina qué campos aparecen cada día y qué columnas se crean en el Excel.</p>
-    <p>Puedes activar de forma independiente Tarjeta, Uber, Uber Cash, FreeNow, FreeNow Cash, Abonados, Imbric, JoinUp, Gasolina, Lavado y cualquier concepto de empresa que añadas tú mismo.</p>
+    <p>Elige si trabajas como <b>Chofer</b> o como <b>Titular</b>. Después activa únicamente las columnas y módulos que utilizas. La configuración determina qué campos aparecen cada día, qué cálculos realiza la app y qué columnas se crean en el Excel.</p>
+    <p>Puedes activar de forma independiente Tarjeta/TPV, Uber, Uber Cash, FreeNow, FreeNow Cash, Abonados, Imbric, JoinUp, Gasolina, Lavado, kilometraje y otros conceptos de empresa personalizados.</p>
   </section>
 
   <section class="card">
-    <h2>2. Cómo se calcula una jornada de chofer</h2>
-    <p>La app parte de la recaudación total del día. A Imbric se le aplica un 12% de descuento y a JoinUp un 10%. Esos descuentos reducen la base diaria antes de realizar el reparto, ya que son importes que no se cobran finalmente.</p>
-    <p>Si el reparto está activo, la app calcula la parte del chofer y la parte del jefe según el porcentaje configurado. Al chofer se le descuenta el seguro diario si está activado.</p>
-    <p>De la parte del jefe se descuentan los importes que ya cobra o que corresponden a la empresa: Tarjeta, Uber, FreeNow, Abonados, Imbric neto, JoinUp neto, Gasolina, Lavado y los otros conceptos de empresa configurados. Después se suman Uber Cash y FreeNow Cash, porque esos importes figuran como cobrados por el chofer.</p>
+    <h2>2. Estado de la jornada</h2>
+    <p>Cada fecha puede marcarse como <b>Trabajo, Descanso, Vacaciones, Baja, Taller u Otro</b>.</p>
+    <p>Si dentro del periodo analizado existe un día sin importes ni estado confirmado, la app lo tratará de forma provisional como <b>Descanso pendiente de concretar</b>. En el análisis se indicará expresamente cuántos días están pendientes para distinguirlos de los descansos confirmados y evitar que un olvido de introducir datos quede registrado como un descanso definitivo.</p>
+    <p>Cuando posteriormente se concrete ese día, podrá confirmarse como <b>Descanso</b> o cambiarse a Trabajo, Vacaciones, Baja, Taller u Otro. Los estados confirmados son los que forman el histórico definitivo y los que se guardan como tales en el Excel.</p>
+    <p>Cuando el estado confirmado no es Trabajo, los importes económicos de ese día quedan a cero. Los análisis y PDF pueden mostrar el total de días trabajados, los descansos confirmados, los días pendientes de concretar y el desglose de los demás días no trabajados por motivo.</p>
   </section>
 
   <section class="card">
-    <h2>3. Uber Cash y FreeNow Cash pagados finalmente con TPV</h2>
-    <p>La liquidación no necesita una segunda corrección. Si parte de un servicio que Uber o FreeNow declara como Cash se cobra finalmente con el TPV del jefe, ese importe ya forma parte del total de Tarjeta que se descuenta de la parte del jefe. Por tanto, el Cash declarado por las plataformas se sigue sumando completo en la liquidación.</p>
-    <p>Los campos “Uber Cash cobrado por TPV” y “FreeNow Cash cobrado por TPV” son informativos. Sirven para que el titular pueda conocer cuánto efectivo real hubo. La app calcula el efectivo real de plataforma como Cash declarado menos Cash cobrado por TPV, pero ese cálculo informativo no vuelve a intervenir en la liquidación jefe/chofer.</p>
+    <h2>3. Perfil Chofer y porcentaje de reparto</h2>
+    <p>En perfil Chofer la app reparte la <b>base ajustada</b> entre chofer y jefe según el porcentaje configurado. Puede ser 50%, 45%, 40% o cualquier otro porcentaje entre 0 y 100. El resto del porcentaje corresponde al jefe.</p>
+    <p>El Total día se calcula automáticamente como <b>Cierre PideTaxi + Uber + FreeNow</b>. PideTaxi engloba los servicios propios de PideTaxi y también Abonados, JoinUp e Imbric; estos últimos se detallan por separado para aplicar correctamente sus comisiones y la liquidación.</p>
+    <p>A Imbric se le descuenta un 12% y a JoinUp un 10%. La suma de ambos descuentos se resta del Total día antes de calcular el reparto. Mientras introduces importes, la interfaz actualiza al instante Total día, comisiones, base ajustada, parte del chofer, parte del jefe y liquidación.</p>
   </section>
 
   <section class="card">
-    <h2>4. Perfil de titular</h2>
-    <p>En un perfil de titular no es obligatorio aplicar reparto ni seguro. La app muestra la facturación ajustada por las comisiones de Imbric y JoinUp y puede descontar Gasolina, Lavado y otros conceptos de empresa para mostrar un resultado real después de gastos.</p>
-    <p>Uber Cash y FreeNow Cash no se añaden a la facturación del titular porque ya forman parte de los totales de esas plataformas. Los campos Cash/TPV permiten únicamente conciliar dónde se cobró realmente el dinero.</p>
+    <h2>4. Seguro del chofer</h2>
+    <p>El seguro diario es configurable y solo afecta al perfil Chofer. Cuando se aplica, se descuenta de la parte del chofer y se suma a la parte del jefe antes de realizar el resto de ajustes.</p>
+    <p>Si un día concreto no corresponde descontar seguro, la jornada permite desmarcar <b>Aplicar seguro hoy</b>. Ese día el seguro será 0 € sin modificar la configuración general ni recalcular jornadas anteriores.</p>
   </section>
 
   <section class="card">
-    <h2>5. Excel, análisis y PDF</h2>
-    <p>TaxiCuenta guarda cada jornada dentro de la PWA y, cuando el navegador lo permite, puede vincular un Excel para actualizarlo después de cada jornada. En navegadores sin acceso directo a archivos puedes descargar en cualquier momento un Excel actualizado.</p>
-    <p>La pestaña Análisis permite elegir un rango de fechas y generar dos documentos: PDF detallado, con las jornadas del periodo, y PDF acumulado, con los totales.</p>
+    <h2>5. Liquidación del jefe</h2>
+    <p>De la parte del jefe más el seguro se descuentan los importes que ya cobra o que corresponden a la empresa: Tarjeta/TPV, Uber, FreeNow, Abonados, Imbric neto, JoinUp neto, Gasolina, Lavado, kilometraje cuando esté activado y los otros conceptos de empresa configurados.</p>
+    <p>Después se suman Uber Cash y FreeNow Cash, porque esas cantidades figuran como efectivo cobrado por el chofer. El resultado es la <b>Liquidación jefe</b>.</p>
   </section>
 
   <section class="card">
-    <h2>6. Seguridad de los datos</h2>
-    <p>La aplicación utiliza almacenamiento propio. Su service worker y su caché tienen nombres exclusivos y no borran ni modifican cachés de otras PWA. Puedes crear además una copia JSON de todos tus datos desde Configuración.</p>
+    <h2>6. Uber Cash y FreeNow Cash pagados finalmente con TPV</h2>
+    <p>Si parte de un servicio que Uber o FreeNow declara como Cash se cobra finalmente con el TPV del jefe, no hay que volver a descontarlo de la liquidación: ese cobro ya forma parte del total de Tarjeta/TPV que se descuenta al jefe.</p>
+    <p>Por eso el Cash declarado por Uber o FreeNow se sigue sumando completo. Los campos <b>Uber Cash cobrado por TPV</b> y <b>FreeNow Cash cobrado por TPV</b> son solo informativos y sirven para calcular el efectivo real de plataforma: Cash declarado menos Cash cobrado por TPV.</p>
+  </section>
+
+  <section class="card">
+    <h2>7. Descuento por kilómetros</h2>
+    <p>Este módulo es opcional. En Configuración se indica el precio a descontar por cada kilómetro recorrido y, en la jornada, se introducen los kilómetros realizados. La app calcula automáticamente <b>kilómetros × importe por km</b>.</p>
+    <p>En perfil Chofer ese importe se descuenta únicamente de la liquidación del jefe y no reduce «A percibir chofer». En perfil Titular, si el módulo está activado, se descuenta del resultado del titular como coste de explotación.</p>
+    <p>El precio por km queda guardado con cada jornada. Si el acuerdo cambia más adelante, las jornadas antiguas conservan el precio que tenían cuando se registraron.</p>
+  </section>
+
+  <section class="card">
+    <h2>8. Perfil Titular</h2>
+    <p>En perfil Titular <b>no se realiza reparto por porcentaje</b>. La facturación corresponde al titular y la app parte del 100% del Total día. Después aplica las comisiones de Imbric y JoinUp y descuenta los gastos o módulos activados, como Gasolina, Lavado, otros conceptos de empresa y kilometraje.</p>
+    <p>Uber Cash y FreeNow Cash no se vuelven a sumar a la facturación del titular porque ya están incluidos dentro de los totales de esas plataformas. Los datos Cash/TPV sirven únicamente para conciliar dónde se cobró realmente el dinero.</p>
+  </section>
+
+  <section class="card">
+    <h2>9. Nómina de referencia en los PDF</h2>
+    <p>La nómina es un módulo opcional de cierre. Puedes activarla en Configuración e indicar su importe. Cuando está activada, el PDF puede mostrarla como <b>referencia informativa</b> del periodo.</p>
+    <p>La nómina no modifica las fórmulas diarias, el reparto, «A percibir chofer» ni la liquidación del jefe. Su finalidad es que el informe mensual pueda incluir una referencia adicional cuando la relación laboral o el sistema de liquidación lo necesite.</p>
+  </section>
+
+  <section class="card">
+    <h2>10. Desglose de efectivo para entregar al jefe</h2>
+    <p>También puede activarse de forma opcional un bloque de <b>billetes y monedas</b> para los periodos en los que haya que entregar efectivo al jefe. Este bloque aparece en Análisis solo en perfil Chofer cuando la opción está activada.</p>
+    <p>Se indican las unidades de cada denominación y la app calcula el total de efectivo preparado. Ese total se compara con la Liquidación jefe del periodo y muestra la diferencia. El desglose es una ayuda para cuadrar la entrega física de dinero y <b>no modifica la contabilidad ni recalcula la liquidación</b>.</p>
+    <p>Si no hay que entregar efectivo o el pago se realiza por transferencia, Bizum u otro medio, este módulo puede dejarse desactivado y no aparecerá en el PDF.</p>
+  </section>
+
+  <section class="card">
+    <h2>11. Excel, análisis y PDF</h2>
+    <p>Contabilidad Taxi guarda cada jornada dentro de la PWA y, cuando el navegador lo permite, puede vincular un Excel para actualizarlo después de cada jornada. En navegadores sin acceso directo a archivos puedes descargar en cualquier momento un Excel actualizado.</p>
+    <p>La pestaña Análisis permite elegir un rango de fechas y generar PDF detallado o acumulado. Los informes usan la línea visual de la app: cabecera azul marino, bloques claros y botones de exportación diferenciados. Los importes negativos se muestran en rojo, incluida la fila final de totales del PDF detallado.</p>
+  </section>
+
+  <section class="card">
+    <h2>12. Seguridad de los datos</h2>
+    <p>La aplicación utiliza almacenamiento propio. Su service worker y su caché tienen nombres exclusivos y no enumeran, borran ni modifican cachés de otras PWA. Puedes crear además una copia JSON de todos tus datos desde Configuración.</p>
   </section>
 </div>
 <script>

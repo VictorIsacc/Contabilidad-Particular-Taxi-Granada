@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#111827">
   <meta name="description" content="PWA configurable de contabilidad diaria para taxi">
-  <title>TaxiCuenta</title>
+  <title>Contabilidad Taxi</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon-192.png" sizes="192x192">
   <link rel="apple-touch-icon" href="icon-192.png">
@@ -17,7 +17,7 @@
       <div class="brand">
         <img src="logo-contabilidad-taxi.png" alt="Contabilidad Taxi" class="brand-icon brand-logo">
         <div>
-          <h1>TaxiCuenta</h1>
+          <h1>Contabilidad Taxi</h1>
           <p id="profileBadge">Contabilidad taxi configurable</p>
         </div>
       </div>
@@ -68,14 +68,32 @@
               <span>Fecha</span>
               <input id="dayDate" type="date" required>
             </label>
+            <label class="field">
+              <span>Estado del día</span>
+              <select id="dayStatus">
+                <option value="work">Trabajo</option>
+                <option value="rest">Descanso</option>
+                <option value="vacation">Vacaciones</option>
+                <option value="sick">Baja</option>
+                <option value="workshop">Taller</option>
+                <option value="other">Otro</option>
+              </select>
+            </label>
             <label class="field emphasis-field">
-              <span>Recaudación total del día</span>
-              <div class="money-input"><input id="dayTotal" type="number" min="0" step="0.01" inputmode="decimal" required><b>€</b></div>
+              <span>Total día</span>
+              <div class="money-input"><input id="dayTotal" type="number" step="0.01" inputmode="decimal" value="0" readonly aria-readonly="true"><b>€</b></div>
+              <small class="muted">Se calcula automáticamente: Cierre PideTaxi + Uber + FreeNow.</small>
+            </label>
+            <label class="field emphasis-field">
+              <span>Cierre PideTaxi</span>
+              <div class="money-input"><input data-day-field="pidetaxi" type="number" min="0" step="0.01" inputmode="decimal" value="0"><b>€</b></div>
+              <small class="muted">Incluye los servicios PideTaxi; Abonados, JoinUp e Imbric se detallan aparte cuando estén activados.</small>
             </label>
           </div>
 
           <div id="dynamicFields" class="form-grid"></div>
           <div id="customDayFields" class="form-grid"></div>
+          <div id="dayOptions" class="day-options"></div>
 
           <label class="field field-wide">
             <span>Notas de la jornada</span>
@@ -121,13 +139,21 @@
           </div>
         </section>
         <div id="analysisCards" class="kpi-grid"></div>
+        <section id="cashBreakdownCard" class="card hidden">
+          <div class="card-title-row wrap-row">
+            <div><h3>Efectivo para liquidación</h3><p>Opcional. Introduce las unidades de cada billete o moneda si vas a entregar efectivo al jefe. Se comparará con la liquidación del jefe del periodo.</p></div>
+            <div class="cash-target"><small>Objetivo a entregar</small><strong id="cashTargetAmount">0,00 €</strong></div>
+          </div>
+          <div id="cashDenominations" class="denomination-grid"></div>
+          <div class="cash-summary"><span>Total preparado: <b id="cashPreparedTotal">0,00 €</b></span><span>Diferencia: <b id="cashPreparedDiff">0,00 €</b></span></div>
+        </section>
         <section class="card">
           <div class="card-title-row wrap-row">
             <div><h3>Detalle del periodo</h3><p id="analysisCaption"></p></div>
             <div class="button-row">
-              <button id="pdfDetailBtn" class="btn btn-secondary">PDF detallado</button>
-              <button id="pdfSummaryBtn" class="btn btn-secondary">PDF acumulado</button>
-              <button id="exportExcelBtn" class="btn btn-secondary">Exportar Excel actualizado</button>
+              <button id="pdfDetailBtn" class="btn btn-detail-pdf">PDF detallado</button>
+              <button id="pdfSummaryBtn" class="btn btn-pdf">PDF acumulado</button>
+              <button id="exportExcelBtn" class="btn btn-success">Exportar Excel actualizado</button>
             </div>
           </div>
           <div class="table-wrap"><table id="analysisTable"></table></div>
@@ -168,16 +194,29 @@
               <label class="choice-card"><input type="radio" name="profile" value="owner"><span><b>Titular</b><small>Sin reparto obligatorio; muestra facturación y resultado tras gastos.</small></span></label>
             </div>
             <div class="form-grid">
-              <label class="field switch-field"><span>Aplicar reparto</span><input id="splitEnabled" type="checkbox"></label>
-              <label class="field"><span>Porcentaje chofer</span><div class="money-input"><input id="splitPct" type="number" min="0" max="100" step="0.01"><b>%</b></div></label>
+              <label class="field switch-field"><span>Reparto chofer / jefe</span><input id="splitEnabled" type="checkbox" disabled></label>
+              <label class="field"><span>Porcentaje para el chofer</span><div class="money-input"><input id="splitPct" type="number" min="0" max="100" step="0.01"><b>%</b></div><small class="muted">En perfil Chofer se aplica este porcentaje sobre la base ajustada; el resto corresponde al jefe. En perfil Titular no se aplica reparto.</small></label>
               <label class="field switch-field"><span>Descontar seguro al chofer</span><input id="insuranceEnabled" type="checkbox"></label>
               <label class="field"><span>Seguro diario</span><div class="money-input"><input id="insuranceDaily" type="number" min="0" step="0.01"><b>€</b></div></label>
+              <label class="field switch-field"><span>Aplicar descuento por kilómetros</span><input id="mileageEnabled" type="checkbox"></label>
+              <label class="field"><span>Importe por km recorrido</span><div class="money-input"><input id="mileageRate" type="number" min="0" step="0.001" inputmode="decimal"><b>€/km</b></div><small class="muted">Chofer: se descuenta de la liquidación del jefe. Titular: se descuenta del resultado del titular.</small></label>
+            </div>
+          </div>
+
+          <div class="config-section">
+            <h3>PDF y cierre de periodo</h3>
+            <p class="muted">Estas opciones son solo referencias de cierre. No modifican las fórmulas de las jornadas.</p>
+            <div class="form-grid">
+              <label class="field switch-field"><span>Incluir nómina de referencia en PDF</span><input id="payrollPdfEnabled" type="checkbox"></label>
+              <label class="field"><span>Importe de nómina</span><div class="money-input"><input id="payrollAmount" type="number" min="0" step="0.01" inputmode="decimal"><b>€</b></div><small class="muted">Se mostrará como referencia en los PDF cuando la opción esté activada. No altera la liquidación diaria.</small></label>
+              <label class="field switch-field"><span>Permitir desglose de efectivo para el jefe</span><input id="cashBreakdownEnabled" type="checkbox"></label>
+              <div class="field"><span>Uso del desglose</span><small class="muted">En perfil Chofer aparecerá en Análisis un bloque para indicar billetes y monedas. Sirve para cuadrar una entrega de efectivo con la liquidación del jefe; no modifica la contabilidad.</small></div>
             </div>
           </div>
 
           <div class="config-section">
             <h3>Columnas activas</h3>
-            <p class="muted">Activa solamente aquello que utilices. Uber Cash y FreeNow Cash son independientes de la plataforma principal.</p>
+            <p class="muted">Cierre PideTaxi y Total día forman parte de la estructura base. Activa solamente los demás conceptos que utilices. Uber Cash y FreeNow Cash son independientes de la plataforma principal.</p>
             <div id="moduleChoices" class="module-grid"></div>
           </div>
 
@@ -212,12 +251,13 @@
     <form method="dialog" id="setupForm">
       <div class="setup-hero">
         <img src="icon-192.png" alt="">
-        <div><h2>Configura tu TaxiCuenta</h2><p>La app creará su estructura según cómo trabajes.</p></div>
+        <div><h2>Configura tu Contabilidad Taxi</h2><p>La app creará su estructura según cómo trabajes.</p></div>
       </div>
       <div class="setup-body">
         <label class="field"><span>Perfil inicial</span><select id="setupProfile"><option value="driver">Chofer</option><option value="owner">Titular de licencia</option></select></label>
+        <label class="field"><span>Porcentaje para el chofer</span><div class="money-input"><input id="setupSplitPct" type="number" min="0" max="100" step="0.01" value="50"><b>%</b></div><small class="muted">Solo se aplica al perfil Chofer. El resto del porcentaje corresponde al jefe.</small></label>
         <label class="field"><span>Seguro diario del chofer</span><div class="money-input"><input id="setupInsurance" type="number" min="0" step="0.01" value="0"><b>€</b></div></label>
-        <p class="muted">Después podrás activar o desactivar Uber, Uber Cash, FreeNow, FreeNow Cash, Tarjeta, Abonados, Imbric, JoinUp, gasolina, lavado y el resto de conceptos.</p>
+        <p class="muted">Después podrás activar o desactivar Uber, Uber Cash, FreeNow, FreeNow Cash, Tarjeta, Abonados, Imbric, JoinUp, gasolina, lavado, descuento por kilómetros y el resto de conceptos.</p>
       </div>
       <div class="dialog-actions"><button value="cancel" class="btn btn-secondary">Cerrar</button><button id="finishSetup" value="default" class="btn btn-primary">Crear perfil</button></div>
     </form>
