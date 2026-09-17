@@ -12,6 +12,14 @@
     <a class="btn btn-primary" href="index.html">Volver a la app</a>
   </header>
 
+  <section id="novedades-v2" class="card">
+    <h2>Novedades V2.0 · Titular + Chofer</h2>
+    <p>La V2.0 añade una función especialmente pensada para titulares que también trabajan con un asalariado. El titular puede mantener <b>su propia contabilidad</b> y activar además una <b>contabilidad independiente del chofer</b>, con sus jornadas, porcentaje, seguro, kilometraje, plataformas y conceptos propios.</p>
+    <p>Cuando esta función está activa aparece una nueva pestaña <b>Chofer</b> y, dentro de Análisis, el selector <b>Titular · Chofer · Combinado</b>. El modo Combinado ofrece una visión global del taxi sin mezclar ni duplicar los repartos internos entre trabajador y titular.</p>
+    <p>También se incorpora el <b>intercambio de una jornada individual por JSON</b>: el chofer puede compartir desde el móvil una jornada guardada mediante WhatsApp, correo u otra aplicación compatible, y el titular puede importarla directamente en su pestaña Chofer sin volver a escribir los datos.</p>
+    <p>Durante los primeros cinco días de esta versión la cabecera muestra durante unos diez segundos un aviso de <b>Novedades V2.0</b>. Después la cabecera se recoge automáticamente y queda visible la barra de pestañas. El botón ☰ de esa barra permite volver a mostrar u ocultar la cabecera cuando sea necesario.</p>
+  </section>
+
   <section class="card">
     <h2>1. Configuración inicial</h2>
     <p>Elige si trabajas como <b>Chofer</b> o como <b>Titular</b>. Después activa únicamente las columnas y módulos que utilizas. La configuración determina qué campos aparecen cada día, qué cálculos realiza la app y qué columnas se crean en el Excel.</p>
@@ -21,6 +29,7 @@
   <section class="card">
     <h2>2. Estado de la jornada</h2>
     <p>Cada fecha puede marcarse como <b>Trabajo, Descanso, Vacaciones, Baja, Taller u Otro</b>. Si dentro del periodo analizado existe una fecha sin importes ni estado confirmado, la app la toma de forma provisional como <b>Descanso provisional · Pendiente</b>.</p>
+    <p>La fecha de Jornada se considera la <b>fecha contable de la jornada</b> y puede modificarse manualmente. Esto permite que un turno que termine después de las 00:00 siga contabilizado en el día anterior cuando realmente pertenece a esa jornada.</p>
     <p>Ese descanso provisional <b>no se considera un descanso confirmado</b>. En Análisis aparece un aviso con el número de días pendientes de concretar y sus fechas, para que posteriormente se indique si fueron realmente Descanso, Trabajo, Vacaciones, Baja, Taller u Otro.</p>
     <p>Cuando el estado no es Trabajo, los importes económicos de ese día quedan a cero. El Excel identifica además si el día está <b>Concretado</b> o sigue pendiente. Los análisis y PDF separan los descansos confirmados de los provisionales para evitar que un día olvidado quede definitivamente contabilizado como descanso.</p>
   </section>
@@ -64,20 +73,47 @@
   </section>
 
   <section class="card">
-    <h2>9. Nómina de referencia en los PDF</h2>
+    <h2>9. Titular con contabilidad adicional de chofer</h2>
+    <p>Si el perfil principal es <b>Titular</b>, en Configuración aparece la opción <b>Gestionar también un chofer</b>. Al activarla se puede indicar un nombre o referencia para el trabajador y configurar de forma independiente su porcentaje de reparto, seguro diario, descuento por kilómetros, plataformas activas y otros conceptos.</p>
+    <p>La nueva pestaña <b>Chofer</b> funciona como una segunda contabilidad de jornadas. Los datos del titular y los del chofer se guardan por separado. Una jornada introducida en la pestaña Jornada pertenece al titular; una jornada introducida en Chofer pertenece al asalariado. Esto evita mezclar movimientos y permite revisar cada actividad de forma independiente.</p>
+    <p>En <b>Análisis</b> aparece un selector con tres opciones: <b>Titular</b>, <b>Chofer</b> y <b>Combinado</b>. Titular muestra únicamente las jornadas propias. Chofer muestra el reparto y la liquidación del asalariado. Combinado presenta una tabla con las columnas Titular, Chofer y Total combinado para los principales conceptos de actividad.</p>
+    <p>El informe combinado puede mostrar la <b>facturación total del taxi</b>, Cierre PideTaxi, Uber, FreeNow, Cash, Abonados, JoinUp, Imbric, comisiones, Gasolina, Lavado, kilometraje y especialmente <b>Tarjeta / TPV</b>. La suma de TPV se identifica como referencia de lo que debería haberse cobrado mediante el terminal y, por tanto, debería encontrarse en la cuenta bancaria vinculada a esos cobros.</p>
+    <p>Además existe un bloque de <b>Control del titular</b> con la facturación del titular, la facturación generada por el chofer, el total global del taxi, el TPV esperado en banco, el <b>seguro percibido del chofer</b>, A percibir chofer, la liquidación del chofer al titular y el resultado de las jornadas propias del titular.</p>
+    <p><b>Importante:</b> A percibir chofer, seguro y liquidación son referencias internas de reparto. El modo Combinado no las vuelve a sumar como facturación, porque hacerlo duplicaría dinero que ya está incluido en la actividad del taxi.</p>
+    <p>Los PDF se adaptan al ámbito seleccionado. Si se elige Combinado, el PDF acumulado muestra Titular, Chofer y Total combinado, más el bloque de control del titular. El PDF detallado identifica el origen de cada jornada para poder revisar ambos turnos en un mismo informe.</p>
+    <p>En el Excel se mantiene la hoja <b>Jornadas</b> para la contabilidad principal del titular y se añaden <b>Jornadas_Chofer</b>, <b>Configuración_Chofer</b> y <b>Resumen_Combinado</b>. De esta forma el libro conserva separada la información de cada persona y dispone a la vez de un resumen global. Las hojas nuevas solo se crean cuando el Titular activa la gestión del chofer.</p>
+    <p>La copia JSON pasa a guardar también toda la configuración y las jornadas del chofer. Un JSON antiguo sigue siendo válido: se restaura la contabilidad existente y la función del chofer queda desactivada hasta que el titular decida configurarla. Al pasar un JSON V2.0 entre teléfono y PC viajan tanto los datos del titular como los del chofer.</p>
+  </section>
+
+  <section class="card">
+    <h2>10. Enviar una jornada del chofer al titular por JSON</h2>
+    <p>Esta función es distinta de la <b>Copia JSON</b> general. La copia general sirve para trasladar o restaurar toda la aplicación; el <b>JSON de jornada</b> contiene únicamente una jornada concreta del chofer y está pensado para enviarla al titular sin afectar al resto de sus datos.</p>
+    <p>En perfil <b>Chofer</b>, después de guardar una jornada aparece el botón <b>Compartir</b> en la tabla de Últimas jornadas. En un móvil compatible, la app abrirá el menú de compartir del sistema para poder elegir WhatsApp, correo, Telegram u otra aplicación. Si el navegador no permite compartir archivos directamente, se descargará el JSON para que pueda enviarse manualmente.</p>
+    <p>La jornada del chofer incorpora también una <b>Hora de inicio</b>. La fecha sigue siendo una <b>fecha contable</b> editable, pero la app ayuda a evitar errores cuando el turno acaba después de medianoche. Si, por ejemplo, son las 00:45 del día 18 y se indica una hora de inicio de 18:00, la aplicación entiende que el turno comenzó el día anterior y cambia automáticamente la fecha contable al 17/09.</p>
+    <p>Cuando la app realiza ese ajuste muestra un aviso visible indicando que la fecha se ha cambiado al día anterior. El usuario puede modificarla manualmente si existe alguna situación excepcional. Si la hora de inicio es anterior a la hora actual —por ejemplo, inicio 08:00 y son las 17:00— la fecha se mantiene en el día actual.</p>
+    <p>El JSON individual de la jornada guarda tanto la <b>fecha contable</b> como la <b>hora de inicio</b>. Por ello, aunque el archivo se genere físicamente después de las 00:00, el titular recibirá la jornada asociada al día al que realmente pertenece. El nombre del archivo utiliza esa fecha contable.</p>
+    <p>El titular, con <b>Gestionar también un chofer</b> activado, entra en la pestaña Chofer y utiliza <b>Importar jornada JSON</b>. Antes de guardar nada, la app muestra una vista previa con <b>fecha contable y hora de inicio</b>, estado, Total día, PideTaxi, Uber, FreeNow, TPV, porcentaje, seguro, A percibir chofer y liquidación del titular.</p>
+    <p>La jornada recibida conserva el <b>porcentaje, el seguro y el precio por kilómetro</b> con los que fue guardada por el chofer. De este modo, un cambio posterior en la configuración del titular no altera los cálculos históricos de la jornada recibida. Los campos y conceptos que hayan tenido movimiento también se conservarán aunque no estén activados en ese momento en la configuración general.</p>
+    <p>Si ya existe una jornada del chofer con la misma fecha, la vista previa avisa de ello. Al confirmar, la jornada recibida <b>sustituye la existente</b> en lugar de crear un duplicado. Esto permite que el chofer corrija un error, vuelva a compartir el archivo y el titular actualice esa misma jornada.</p>
+    <p>Una vez importada, la jornada entra automáticamente en el Análisis del Chofer y en el modo Combinado. Si existe un Excel vinculado, la app intenta sincronizarlo y la jornada se incorpora a <b>Jornadas_Chofer</b>; esa hoja identifica además si la jornada fue introducida manualmente por el titular o llegó mediante un JSON recibido.</p>
+    <p><b>Importante:</b> no utilices “Restaurar JSON” para importar una sola jornada recibida. La opción correcta es <b>Importar jornada JSON</b> dentro de la pestaña Chofer. Restaurar JSON está reservado para copias completas y sustituye los datos de la instalación.</p>
+  </section>
+
+  <section class="card">
+    <h2>11. Nómina de referencia en los PDF</h2>
     <p>La nómina es un módulo opcional de cierre. Puedes activarla en Configuración e indicar su importe. Cuando está activada, el PDF puede mostrarla como <b>referencia informativa</b> del periodo.</p>
     <p>La nómina no modifica las fórmulas diarias, el reparto, «A percibir chofer» ni la liquidación del jefe. Su finalidad es que el informe mensual pueda incluir una referencia adicional cuando la relación laboral o el sistema de liquidación lo necesite.</p>
   </section>
 
   <section class="card">
-    <h2>10. Desglose de efectivo para entregar al jefe</h2>
+    <h2>12. Desglose de efectivo para entregar al jefe</h2>
     <p>También puede activarse de forma opcional un bloque de <b>billetes y monedas</b> para los periodos en los que haya que entregar efectivo al jefe. Este bloque aparece en Análisis solo en perfil Chofer cuando la opción está activada.</p>
     <p>Se indican las unidades de cada denominación y la app calcula el total de efectivo preparado. Ese total se compara con la Liquidación jefe del periodo y muestra la diferencia. El desglose es una ayuda para cuadrar la entrega física de dinero y <b>no modifica la contabilidad ni recalcula la liquidación</b>.</p>
     <p>Si no hay que entregar efectivo o el pago se realiza por transferencia, Bizum u otro medio, este módulo puede dejarse desactivado y no aparecerá en el PDF.</p>
   </section>
 
   <section class="card">
-    <h2>11. Ingresos · Caja diaria</h2>
+    <h2>13. Ingresos · Caja diaria</h2>
     <p>La pestaña <b>Ingresos</b> funciona como un control de caja independiente de la introducción de importes de la jornada. En lugar de escribir un importe total, se indican las <b>unidades de cada billete y moneda</b> que se han ingresado. La app calcula automáticamente el importe que aporta cada denominación y el <b>Total ingresado del día</b>.</p>
     <p>Se pueden registrar billetes de 100 €, 50 €, 20 €, 10 € y 5 €, y monedas de 2 €, 1 €, 0,50 €, 0,20 €, 0,10 €, 0,05 €, 0,02 € y 0,01 €. Las monedas son opcionales: si no se utilizan, basta con dejarlas a cero.</p>
     <p>Cuando el perfil es Chofer y existe una jornada guardada para esa misma fecha, la app toma como referencia <b>A percibir chofer</b> de ese día. El total contado se muestra como <b>Ingresado hoy</b> y <b>Pendiente por percibir</b> se calcula como A percibir chofer menos lo ingresado. Por ejemplo, si A percibir chofer son 185,66 € y se ingresan 110,00 €, quedan 75,66 € pendientes por percibir. La diferencia conserva su signo: si resulta negativa, se mostrará en rojo. Si no existe una jornada de referencia, o en perfil Titular, la pestaña sigue sirviendo como registro de caja sin generar por sí sola una referencia de reparto.</p>
@@ -87,23 +123,23 @@
   </section>
 
   <section class="card">
-    <h2>12. Excel, análisis y PDF</h2>
-    <p>Contabilidad Taxi guarda cada jornada dentro de la PWA y, cuando el navegador lo permite, puede vincular un Excel para actualizarlo después de cada jornada. En navegadores sin acceso directo a archivos puedes descargar en cualquier momento un Excel actualizado.</p>
+    <h2>14. Excel, análisis y PDF</h2>
+    <p>Contabilidad Taxi guarda cada jornada dentro de la PWA y, cuando el navegador lo permite, puede vincular un Excel para actualizarlo después de cada jornada. En navegadores sin acceso directo a archivos puedes descargar en cualquier momento un Excel actualizado. En perfil Titular con chofer, el Excel mantiene las jornadas de ambos separadas y añade un Resumen_Combinado para facilitar la revisión global.</p>
     <p>La pestaña <b>Análisis</b> muestra, al estilo de Contabilidad Taxi Cloud, dos bloques paralelos: <b>Total del período</b> y <b>Media por día trabajado</b>. Incluye las líneas activas de PideTaxi, Uber, FreeNow, Cash, Abonados, JoinUp, Imbric, comisiones, reparto, seguro, TPV, gastos, kilometraje, Liquidación jefe y A percibir chofer. Las líneas principales se identifican mediante colores para facilitar la lectura y los importes negativos aparecen en rojo.</p><p>En perfil Chofer se muestra además un bloque de <b>Datos para la liquidación del período</b> con Liquidación jefe, A percibir chofer y, cuando esté configurada, la Nómina de referencia y el resultado de Nómina + Liquidación jefe.</p><p>El PDF acumulado dispone de opciones para <b>incluir A percibir chofer</b> y <b>añadir la referencia de liquidación</b>. Su tabla es compacta y muestra Total del período y Media por día trabajado con las mismas referencias de color que el análisis.</p><p>La pestaña Análisis permite elegir un rango de fechas y generar PDF detallado o acumulado. Si faltan jornadas por concretar, el análisis las incluye provisionalmente como descanso y muestra una advertencia específica; el PDF acumulado distingue también los descansos confirmados de los provisionales. Los informes usan la línea visual de la app: cabecera azul marino, bloques claros y botones de exportación diferenciados. Los importes negativos se muestran en rojo, incluida la fila final de totales del PDF detallado.</p>
   </section>
 
   <section class="card">
-    <h2>13. Pasar los datos entre el teléfono y el PC mediante JSON</h2>
+    <h2>15. Pasar los datos entre el teléfono y el PC mediante JSON</h2>
     <p>La opción <b>Copia JSON</b> permite trasladar de forma sencilla la configuración, las jornadas y los ingresos entre distintas instalaciones de Contabilidad Taxi. Es especialmente útil para trabajar habitualmente desde el teléfono y, cuando sea necesario, continuar en el PC con exactamente los mismos datos, o realizar el proceso a la inversa.</p>
-    <p><b>Del teléfono al PC:</b> en el teléfono entra en Configuración y pulsa <b>Copia JSON</b>. Envía o copia ese archivo al PC. Después abre Contabilidad Taxi en el PC, entra en Configuración y pulsa <b>Restaurar JSON</b> para seleccionar la copia procedente del teléfono. La app recuperará la configuración, las jornadas y los ingresos contenidos en esa copia.</p>
+    <p><b>Del teléfono al PC:</b> en el teléfono entra en Configuración y pulsa <b>Copia JSON</b>. Envía o copia ese archivo al PC. Después abre Contabilidad Taxi en el PC, entra en Configuración y pulsa <b>Restaurar JSON</b> para seleccionar la copia procedente del teléfono. La app recuperará la configuración, las jornadas y los ingresos contenidos en esa copia. Si la copia pertenece a un Titular que gestiona chofer, también se restauran la configuración y las jornadas del asalariado.</p>
     <p>Si en ese PC ya existe un <b>Excel vinculado</b>, después de restaurar la copia la aplicación preguntará automáticamente si quieres <b>actualizar ahora el Excel con los datos restaurados</b>. Si aceptas, se solicitará permiso de escritura cuando sea necesario y el libro se reconstruirá con la información que acaba de llegar desde el teléfono. Si decides no hacerlo en ese momento, el indicador mostrará <b>Excel pendiente de sincronizar</b> y podrás actualizarlo posteriormente con el botón <b>Sincronizar ahora</b>.</p>
     <p>Si el PC todavía no tiene ningún Excel vinculado, la restauración del JSON seguirá siendo válida: primero tendrás todos los datos dentro de la PWA y después podrás usar <b>Crear / vincular Excel</b> para generar el libro a partir de ellos.</p>
-    <p><b>Del PC al teléfono:</b> realiza una <b>Copia JSON</b> en el PC, pásala al teléfono y usa <b>Restaurar JSON</b> desde la PWA del móvil. El teléfono recuperará la misma configuración, jornadas e ingresos. El vínculo con un archivo Excel no viaja dentro del JSON, porque ese vínculo pertenece al dispositivo y al navegador en el que se creó.</p>
+    <p><b>Del PC al teléfono:</b> realiza una <b>Copia JSON</b> en el PC, pásala al teléfono y usa <b>Restaurar JSON</b> desde la PWA del móvil. El teléfono recuperará la misma configuración, jornadas e ingresos, incluida la contabilidad adicional del chofer cuando exista. El vínculo con un archivo Excel no viaja dentro del JSON, porque ese vínculo pertenece al dispositivo y al navegador en el que se creó.</p>
     <p><b>Importante:</b> Restaurar JSON sustituye los datos actuales de esa instalación por los de la copia seleccionada. Si quieres conservar el estado anterior, realiza antes una nueva <b>Copia JSON</b>. De esta forma puedes utilizar el JSON también como copia de seguridad antes de mover datos entre dispositivos.</p>
   </section>
 
   <section class="card">
-    <h2>14. Seguridad de los datos</h2>
+    <h2>16. Seguridad de los datos</h2>
     <p>La aplicación utiliza almacenamiento propio. Su service worker y su caché tienen nombres exclusivos y no enumeran, borran ni modifican cachés de otras PWA. Puedes crear además una copia JSON de todos tus datos desde Configuración.</p>
   </section>
 </div>

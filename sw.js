@@ -1,4 +1,4 @@
-const CACHE_NAME='taxicuenta-pwa-v1.0.10-core';
+const CACHE_NAME='taxicuenta-pwa-v1.0.13-core';
 const CORE=['./','./index.html','./instrucciones.html','./styles.css','./app.js','./manifest.webmanifest','./icon-192.png','./icon-512.png','./logo-contabilidad-taxi.png'];
 
 self.addEventListener('install',event=>{

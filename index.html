@@ -13,7 +13,16 @@
 </head>
 <body>
   <div id="appShell" class="app-shell">
-    <header class="topbar">
+    <header id="appHeader" class="topbar">
+      <div id="versionNotice" class="version-notice hidden" role="status" aria-live="polite">
+        <div class="version-notice-copy">
+          <span class="version-badge">NOVEDADES V2.0</span>
+          <strong>Nuevo modo Titular + Chofer</strong>
+          <span>Gestiona la contabilidad de un asalariado, importa sus jornadas por JSON y genera análisis y PDF combinados del taxi.</span>
+          <a href="instrucciones.html#novedades-v2">Consultar cambios en Instrucciones</a>
+        </div>
+        <button id="versionNoticeClose" class="version-notice-close" type="button" aria-label="Cerrar aviso">×</button>
+      </div>
       <div class="topbar-main">
         <div class="brand">
           <img src="logo-contabilidad-taxi.png" alt="Contabilidad Taxi" class="brand-icon brand-logo">
@@ -50,9 +59,11 @@
 
     <nav class="tabs tabs-sticky" aria-label="Secciones">
       <button class="tab active" data-tab="jornada">Jornada</button>
+      <button id="workerTabBtn" class="tab hidden" data-tab="chofer">Chofer</button>
       <button class="tab" data-tab="analisis">Análisis</button>
       <button class="tab" data-tab="ingresos">Ingresos</button>
       <button class="tab" data-tab="configuracion">Configuración</button>
+      <button id="headerToggleBtn" class="header-toggle-btn" type="button" title="Mostrar u ocultar cabecera" aria-label="Mostrar u ocultar cabecera">☰</button>
     </nav>
 
     <main>
@@ -68,8 +79,14 @@
         <form id="dayForm" class="card form-card">
           <div class="form-grid fixed-grid">
             <label class="field">
-              <span>Fecha</span>
+              <span>Fecha contable de la jornada</span>
               <input id="dayDate" type="date" required>
+              <small class="muted">Si indicas la hora de inicio, la app puede ajustarla automáticamente al día anterior. Siempre puedes corregirla manualmente.</small>
+            </label>
+            <label id="driverStartTimeField" class="field hidden">
+              <span>Hora de inicio</span>
+              <input id="dayStartTime" type="time" step="60">
+              <small class="muted">Si la jornada termina después de medianoche, la app puede ajustar automáticamente la fecha contable al día anterior.</small>
             </label>
             <label class="field">
               <span>Estado del día</span>
@@ -93,6 +110,7 @@
               <small class="muted">Incluye los servicios PideTaxi; Abonados, JoinUp e Imbric se detallan aparte cuando estén activados.</small>
             </label>
           </div>
+          <div id="dayDateAutoNotice" class="accounting-date-notice hidden" role="status" aria-live="polite"></div>
 
           <div id="dynamicFields" class="form-grid"></div>
           <div id="customDayFields" class="form-grid"></div>
@@ -109,6 +127,10 @@
             <button type="submit" class="btn btn-primary">Guardar jornada</button>
             <button type="button" id="clearDayBtn" class="btn btn-secondary">Limpiar</button>
           </div>
+          <div id="driverShareHint" class="driver-share-hint hidden">
+            <b>Enviar al titular</b>
+            <span>Después de guardar la jornada, usa el botón <b>Compartir</b> de “Últimas jornadas”. En móvil podrás elegir WhatsApp u otra app compatible.</span>
+          </div>
         </form>
 
         <section class="card">
@@ -122,6 +144,47 @@
         </section>
       </section>
 
+      <section id="tab-chofer" class="tab-panel">
+        <div class="section-heading">
+          <div>
+            <h2 id="workerHeading">Jornada del chofer</h2>
+            <p>Contabilidad independiente del asalariado. Solo aparece cuando un Titular activa la gestión de chofer.</p>
+          </div>
+          <button id="workerTodayBtn" class="btn btn-secondary">Hoy</button>
+        </div>
+
+        <form id="workerDayForm" class="card form-card">
+          <div class="form-grid fixed-grid">
+            <label class="field"><span>Fecha contable de la jornada</span><input id="workerDayDate" type="date" required><small class="muted">Si indicas la hora de inicio, la app puede ajustarla automáticamente al día anterior. Siempre puedes corregirla manualmente.</small></label>
+            <label class="field"><span>Hora de inicio</span><input id="workerDayStartTime" type="time" step="60"><small class="muted">Si el turno termina después de medianoche, la app ajustará la fecha contable al día de inicio.</small></label>
+            <label class="field"><span>Estado del día</span><select id="workerDayStatus">
+              <option value="work">Trabajo</option><option value="rest">Descanso</option><option value="vacation">Vacaciones</option><option value="sick">Baja</option><option value="workshop">Taller</option><option value="other">Otro</option>
+            </select></label>
+            <label class="field emphasis-field"><span>Total día</span><div class="money-input"><input id="workerDayTotal" type="number" step="0.01" value="0" readonly><b>€</b></div><small class="muted">Cierre PideTaxi + Uber + FreeNow.</small></label>
+            <label class="field emphasis-field"><span>Cierre PideTaxi</span><div class="money-input"><input data-worker-day-field="pidetaxi" type="number" min="0" step="0.01" inputmode="decimal" value="0"><b>€</b></div></label>
+          </div>
+          <div id="workerDateAutoNotice" class="accounting-date-notice hidden" role="status" aria-live="polite"></div>
+          <div id="workerDynamicFields" class="form-grid"></div>
+          <div id="workerCustomDayFields" class="form-grid"></div>
+          <div id="workerDayOptions" class="day-options"></div>
+          <label class="field field-wide"><span>Notas de la jornada del chofer</span><textarea id="workerDayNotes" rows="3" placeholder="Opcional"></textarea></label>
+          <section id="workerLiveSummary" class="calc-panel"></section>
+          <div class="form-actions"><button type="submit" class="btn btn-primary">Guardar jornada del chofer</button><button type="button" id="workerClearDayBtn" class="btn btn-secondary">Limpiar</button></div>
+        </form>
+
+        <section class="card worker-import-card">
+          <div class="card-title-row wrap-row">
+            <div><h3>Importar jornada recibida del chofer</h3><p>Selecciona el JSON de una sola jornada que te haya enviado el chofer por WhatsApp, correo u otro medio. No sustituye la copia de seguridad general.</p></div>
+            <label class="btn btn-primary file-label">Importar jornada JSON<input id="workerDayImportInput" type="file" accept="application/json,.json" hidden></label>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-title-row"><div><h3>Últimas jornadas del chofer</h3><p>Se guardan separadas de las jornadas del titular. Las jornadas importadas se incorporan también a Jornadas_Chofer del Excel.</p></div></div>
+          <div class="table-wrap"><table id="workerRecentTable"></table></div>
+        </section>
+      </section>
+
       <section id="tab-analisis" class="tab-panel">
         <div class="section-heading">
           <div>
@@ -129,6 +192,14 @@
             <p>Selecciona un rango y genera el resumen o el detalle en PDF.</p>
           </div>
         </div>
+        <section id="analysisScopeCard" class="card analysis-scope-card hidden">
+          <div class="analysis-scope-copy"><b>Contabilidad a analizar</b><span>Consulta al Titular, al Chofer o la actividad combinada del taxi.</span></div>
+          <div class="segmented-control" role="group" aria-label="Ámbito del análisis">
+            <button type="button" class="segment" data-analysis-scope="owner">Titular</button>
+            <button type="button" class="segment" data-analysis-scope="worker">Chofer</button>
+            <button type="button" class="segment active" data-analysis-scope="combined">Combinado</button>
+          </div>
+        </section>
         <section class="card">
           <div class="range-row">
             <label class="field"><span>Desde</span><input id="rangeFrom" type="date"></label>
@@ -144,7 +215,7 @@
         <div id="analysisCards" class="kpi-grid analysis-day-kpis"></div>
         <div id="analysisPendingNotice" class="analysis-notice hidden"></div>
 
-        <section class="card analysis-cloud-summary">
+        <section id="analysisCloudSummaryCard" class="card analysis-cloud-summary">
           <div class="card-title-row wrap-row analysis-summary-heading">
             <div>
               <h3>Totales y medias del período</h3>
@@ -161,6 +232,18 @@
               <div class="analysis-block-head"><div><span class="eyebrow">MEDIA</span><h3>Media por día trabajado</h3></div><small>Excluye días no trabajados</small></div>
               <div id="analysisAveragesList" class="analysis-money-list"></div>
             </div>
+          </div>
+        </section>
+
+        <section id="analysisCombinedSummaryCard" class="card combined-summary-card hidden">
+          <div class="card-title-row wrap-row">
+            <div><h3>Resumen combinado del taxi</h3><p>Actividad del titular y del chofer separada y totalizada, sin duplicar repartos internos.</p></div>
+            <span id="combinedTurnsBadge" class="status-pill">0 turnos trabajados</span>
+          </div>
+          <div class="table-wrap"><table id="combinedSummaryTable"></table></div>
+          <div class="combined-control-block">
+            <div><h3>Control del titular</h3><p>Referencias para comprobar actividad, TPV, seguro y liquidación del chofer.</p></div>
+            <div id="combinedControlGrid" class="analysis-liquidation-grid"></div>
           </div>
         </section>
 
@@ -274,6 +357,28 @@
             </div>
           </div>
 
+          <div id="workerConfigSection" class="config-section hidden">
+            <div class="card-title-row wrap-row">
+              <div><h3>Contabilidad adicional del chofer</h3><p class="muted">Solo para Titulares. Crea una contabilidad separada para un asalariado y permite informes combinados.</p></div>
+              <label class="field switch-field worker-enable-field"><span>Gestionar también un chofer</span><input id="workerEnabled" type="checkbox"></label>
+            </div>
+            <div id="workerConfigPanel" class="worker-config-panel hidden">
+              <div class="form-grid">
+                <label class="field"><span>Nombre o referencia del chofer</span><input id="workerName" type="text" maxlength="50" placeholder="Chofer"></label>
+                <label class="field"><span>Porcentaje para el chofer</span><div class="money-input"><input id="workerSplitPct" type="number" min="0" max="100" step="0.01"><b>%</b></div></label>
+                <label class="field switch-field"><span>Descontar seguro al chofer</span><input id="workerInsuranceEnabled" type="checkbox"></label>
+                <label class="field"><span>Seguro diario</span><div class="money-input"><input id="workerInsuranceDaily" type="number" min="0" step="0.01"><b>€</b></div></label>
+                <label class="field switch-field"><span>Aplicar descuento por kilómetros</span><input id="workerMileageEnabled" type="checkbox"></label>
+                <label class="field"><span>Importe por km</span><div class="money-input"><input id="workerMileageRate" type="number" min="0" step="0.001"><b>€/km</b></div></label>
+              </div>
+              <h4>Plataformas y conceptos del chofer</h4>
+              <p class="muted">Pueden ser distintos de los que utiliza el titular.</p>
+              <div id="workerModuleChoices" class="module-grid"></div>
+              <div class="card-title-row worker-custom-title"><div><h4>Otros gastos o conceptos del chofer</h4><p class="muted">Se aplican a la liquidación de sus jornadas.</p></div><button id="addWorkerCustomConcept" type="button" class="btn btn-secondary">Añadir concepto</button></div>
+              <div id="workerCustomConceptList" class="custom-list"></div>
+            </div>
+          </div>
+
           <div class="config-section">
             <h3>PDF y cierre de periodo</h3>
             <p class="muted">Estas opciones son solo referencias de cierre. No modifican las fórmulas de las jornadas.</p>
@@ -301,7 +406,7 @@
 
           <div class="config-section">
             <h3>Excel</h3>
-            <p class="muted">En Chrome/Edge de escritorio puedes crear o vincular un archivo que la app irá actualizando. En navegadores sin acceso directo a archivos, la app conserva los datos internamente y permite descargar el Excel actualizado. Las copias JSON sirven además para trasladar configuración, jornadas e ingresos entre el teléfono y el PC; si restauras una copia en un PC con un Excel ya vinculado, la app te preguntará si quieres actualizarlo en ese momento.</p>
+            <p class="muted">En Chrome/Edge de escritorio puedes crear o vincular un archivo que la app irá actualizando. En navegadores sin acceso directo a archivos, la app conserva los datos internamente y permite descargar el Excel actualizado. Las copias JSON sirven además para trasladar configuración, jornadas e ingresos entre el teléfono y el PC; si restauras una copia en un PC con un Excel ya vinculado, la app te preguntará si quieres actualizarlo en ese momento. Cuando un Titular gestiona también un chofer, el Excel crea hojas separadas para sus jornadas y un Resumen combinado.</p>
             <div class="button-row">
               <button id="linkExcelBtn" type="button" class="btn btn-primary">Crear / vincular Excel</button>
               <button id="syncExcelBtn" type="button" class="btn btn-secondary">Sincronizar ahora</button>
@@ -317,6 +422,24 @@
       </section>
     </main>
   </div>
+
+  <dialog id="workerImportDialog" class="setup-dialog worker-import-dialog">
+    <form method="dialog" id="workerImportForm">
+      <div class="setup-hero worker-import-hero">
+        <img src="icon-192.png" alt="">
+        <div><h2>Importar jornada del chofer</h2><p>Revisa los datos antes de incorporarlos a la contabilidad.</p></div>
+      </div>
+      <div class="setup-body">
+        <div id="workerImportSummary" class="worker-import-summary"></div>
+        <div id="workerImportWarning" class="analysis-notice hidden"></div>
+        <p class="muted">La jornada conservará el porcentaje, seguro y precio por kilómetro con los que fue guardada por el chofer. La importación no modifica tu configuración general.</p>
+      </div>
+      <div class="dialog-actions">
+        <button id="cancelWorkerImport" value="cancel" class="btn btn-secondary">Cancelar</button>
+        <button id="confirmWorkerImport" value="default" class="btn btn-primary">Incorporar jornada</button>
+      </div>
+    </form>
+  </dialog>
 
   <dialog id="setupDialog" class="setup-dialog">
     <form method="dialog" id="setupForm">
