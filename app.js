@@ -908,6 +908,18 @@ async function pdfHeader(doc,title,subtitle,landscapeMode=false){
   doc.setTextColor(255,255,255);doc.setFont('helvetica','bold');doc.setFontSize(15);doc.text('Contabilidad Taxi',logo?38:15,20);doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(220,234,243);doc.text(title,logo?38:15,27);doc.setFontSize(7.5);doc.text(subtitle,w-14,28,{align:'right'});doc.setTextColor(23,48,68);
 }
 function pdfMoneyCell(v,total=false){const value=num(v);return {content:money(value),styles:{halign:'right',fontStyle:total?'bold':'normal',textColor:value<0?(total?[255,138,128]:[198,40,40]):(total?[255,255,255]:[23,48,68]),fillColor:total?[18,50,74]:undefined}}}
+function pdfStatusFill(record){
+  const status=record?.status||(record?.virtualPending?'pending':'work');
+  return {
+    work:[228,246,234],       // verde claro · Trabajo
+    rest:[255,238,214],       // naranja claro · Descanso
+    pending:[255,246,230],    // naranja muy claro · Descanso provisional
+    workshop:[255,226,226],   // rojizo claro · Taller
+    sick:[226,239,255],       // azul claro · Baja
+    vacation:[239,229,255],   // púrpura claro · Vacaciones
+    other:[240,243,246]       // gris suave · Otro
+  }[status]||[255,255,255];
+}
 function cashCounts(){const out={};$$('[data-cash-denom]').forEach(i=>out[i.dataset.cashDenom]=Math.max(0,parseInt(i.value||'0',10)||0));return out}
 function cashPreparedTotal(){const c=cashCounts();return CASH_DENOMINATIONS.reduce((s,d)=>s+(c[d.key]||0)*d.value,0)}
 function currentBossTarget(){if(state.config.profile!=='driver')return 0;const rows=activeAnalysis.length?activeAnalysis:rangeRecords();return Math.max(0,sumCalc(rows,'bossLiquidation'))}
@@ -966,15 +978,16 @@ async function createDetailPdf(){
     if(activeAnalysisContext.scope==='combined'){
       const {ownerRows,workerRows}=activeAnalysisContext;if(!ownerRows.length&&!workerRows.length)return toast('No hay datos en el rango');const all=[...ownerRows,...workerRows].sort((a,b)=>a.date.localeCompare(b.date)),doc=new jsPDF({orientation:'landscape'});await pdfHeader(doc,'Detalle combinado · Titular + Chofer',`${all[0].date} a ${all[all.length-1].date}`,true);
       const head=['Origen','Fecha','Estado','Total día','PideTaxi','Uber','FreeNow','TPV','Seguro','A percibir chofer','Liq. titular','Resultado titular'];
-      const raw=[...ownerRows.map(r=>({origin:'Titular',kind:'owner',r})),...workerRows.map(r=>({origin:state.worker.name||'Chofer',kind:'worker',r}))].sort((a,b)=>a.r.date.localeCompare(b.r.date)||a.origin.localeCompare(b.origin)).map(x=>{const c=calculateRecord(x.r),v=x.r.values||{};return [x.origin,x.r.date,dayStatusLabel(x.r),c.gross,num(v.pidetaxi),num(v.uber),num(v.freenow),num(v.card),x.kind==='worker'?c.insurance:0,x.kind==='worker'?c.driverNet:0,x.kind==='worker'?c.bossLiquidation:0,x.kind==='owner'?c.ownerNet:0]});
-      const body=raw.map(row=>row.map((v,i)=>i<3?String(v):pdfMoneyCell(v)));doc.autoTable({startY:41,head:[head],body,theme:'grid',styles:{fontSize:5.8,cellPadding:1.5,textColor:[23,48,68],lineColor:[202,217,227],lineWidth:.18},headStyles:{fillColor:[28,77,112],textColor:[255,255,255],fontStyle:'bold'},alternateRowStyles:{fillColor:[245,249,252]}});addCombinedControlPdf(doc,doc.lastAutoTable.finalY+4,ownerRows,workerRows);doc.save(`Contabilidad_Taxi_detalle_combinado_${all[0].date}_${all[all.length-1].date}.pdf`);return;
+      const detailRows=[...ownerRows.map(r=>({origin:'Titular',kind:'owner',r})),...workerRows.map(r=>({origin:state.worker.name||'Chofer',kind:'worker',r}))].sort((a,b)=>a.r.date.localeCompare(b.r.date)||a.origin.localeCompare(b.origin));
+      const raw=detailRows.map(x=>{const c=calculateRecord(x.r),v=x.r.values||{};return [x.origin,x.r.date,dayStatusLabel(x.r),c.gross,num(v.pidetaxi),num(v.uber),num(v.freenow),num(v.card),x.kind==='worker'?c.insurance:0,x.kind==='worker'?c.driverNet:0,x.kind==='worker'?c.bossLiquidation:0,x.kind==='owner'?c.ownerNet:0]});
+      const body=raw.map(row=>row.map((v,i)=>i<3?String(v):pdfMoneyCell(v)));doc.autoTable({startY:41,head:[head],body,theme:'grid',styles:{fontSize:5.8,cellPadding:1.5,textColor:[23,48,68],lineColor:[202,217,227],lineWidth:.18},headStyles:{fillColor:[28,77,112],textColor:[255,255,255],fontStyle:'bold'},didParseCell:data=>{if(data.section!=='body')return;const fill=pdfStatusFill(detailRows[data.row.index]?.r);if(fill)data.cell.styles.fillColor=fill;}});addCombinedControlPdf(doc,doc.lastAutoTable.finalY+4,ownerRows,workerRows);doc.save(`Contabilidad_Taxi_detalle_combinado_${all[0].date}_${all[all.length-1].date}.pdf`);return;
     }
     const kind=activeAnalysisContext.scope==='worker'?'worker':'primary',cfg=contextConfig(kind),rows=activeAnalysis.length?activeAnalysis:rangeRecordsFor(kind);if(!rows.length)return toast('No hay datos en el rango');const doc=new jsPDF({orientation:'landscape'});await pdfHeader(doc,kind==='worker'?`Detalle de jornadas · ${state.worker.name||'Chofer'}`:'Detalle de jornadas · PDF detallado',`${rows[0].date} a ${rows[rows.length-1].date}`,true);
     const cols=activeModuleColumns(rows.filter(r=>!r.virtualPending),cfg),showMileage=cfg.mileageEnabled||rows.some(r=>num(r.values?.km)>0),head=['Fecha','Estado','Total día',...cols.map(c=>c.label),...(showMileage?['Km','Coste km']:[]),(cfg.profile==='driver'?'Base reparto':'Base tras descuentos'),...(cfg.profile==='driver'?['A percibir chofer',kind==='worker'?'Liq. titular':'Liq. jefe']:['Resultado'])];
     const rawRows=rows.map(r=>{const c=calculateRecord(r);return [r.date,dayStatusLabel(r),c.gross,...cols.map(col=>num(r.values?.[col.key])),...(showMileage?[c.mileageKm,c.mileageCost]:[]),c.adjusted,...(cfg.profile==='driver'?[c.driverNet,c.bossLiquidation]:[c.ownerNet])]});
     const sums=head.map((_,i)=>i===0?'TOTAL':rawRows.reduce((acc,row)=>acc+(typeof row[i]==='number'?row[i]:0),0)),body=rawRows.map(row=>row.map((v,i)=>i<=1?String(v):(showMileage&&i===3+cols.length?String(num(v).toLocaleString('es-ES',{maximumFractionDigits:1})):pdfMoneyCell(v))));
     const totalRow=sums.map((v,i)=>i===0?{content:'TOTAL',styles:{fillColor:[18,50,74],textColor:[255,255,255],fontStyle:'bold'}}:i===1?{content:'—',styles:{fillColor:[18,50,74],textColor:[255,255,255],fontStyle:'bold'}}:(showMileage&&i===3+cols.length?{content:num(v).toLocaleString('es-ES',{maximumFractionDigits:1}),styles:{fillColor:[18,50,74],textColor:[255,255,255],fontStyle:'bold',halign:'right'}}:pdfMoneyCell(v,true)));body.push(totalRow);
-    doc.autoTable({startY:41,head:[head],body,theme:'grid',styles:{fontSize:6.5,cellPadding:1.8,textColor:[23,48,68],lineColor:[202,217,227],lineWidth:.2},headStyles:{fillColor:[28,77,112],textColor:[255,255,255],fontStyle:'bold'},alternateRowStyles:{fillColor:[245,249,252]},didParseCell:data=>{if(data.row.index===body.length-1){data.cell.styles.fillColor=[18,50,74];data.cell.styles.fontStyle='bold'}}});
+    doc.autoTable({startY:41,head:[head],body,theme:'grid',styles:{fontSize:6.5,cellPadding:1.8,textColor:[23,48,68],lineColor:[202,217,227],lineWidth:.2},headStyles:{fillColor:[28,77,112],textColor:[255,255,255],fontStyle:'bold'},didParseCell:data=>{if(data.section!=='body')return;if(data.row.index===body.length-1){data.cell.styles.fillColor=[18,50,74];data.cell.styles.fontStyle='bold';return}const fill=pdfStatusFill(rows[data.row.index]);if(fill)data.cell.styles.fillColor=fill;}});
     if(kind==='worker')addWorkerReferenceBlock(doc,doc.lastAutoTable.finalY+5,rows);else addPdfReferences(doc,doc.lastAutoTable.finalY+5,rows);doc.save(`Contabilidad_Taxi_detalle_${kind==='worker'?'chofer_':''}${rows[0].date}_${rows[rows.length-1].date}.pdf`);
   }catch(e){alert(e.message)}
 }
